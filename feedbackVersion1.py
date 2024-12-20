@@ -34,6 +34,9 @@ def transcribe_audio(file_path):
 
 # Function: Generate Feedback
 def generate_feedback(interview_text, job_description, company_name):
+    max_input_length = 3000  # Adjust this based on your token limits
+    truncated_interview_text = interview_text[:max_input_length]
+
     prompt = f"""
     You are an expert interviewer and career coach. Analyze the candidate's interview performance for the position at {company_name}. 
     Consider the following:
@@ -57,6 +60,10 @@ def generate_feedback(interview_text, job_description, company_name):
         max_tokens=1500
     )
     return response.choices[0].message.content
+
+# Transcription Limit Warning
+if len(job_description) > 1000 or (uploaded_audio and os.path.getsize(audio_file_path) > 10 * 1024 * 1024):
+    st.warning("Input too large. Please provide a shorter job description or smaller audio file.")
 
 # Main Workflow
 if uploaded_audio and job_description and company_name and openai_api_key:
