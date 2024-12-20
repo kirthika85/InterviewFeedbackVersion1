@@ -48,10 +48,10 @@ def generate_feedback(interview_text, job_description, company_name):
 
     Provide detailed feedback and a gamified score.
     """
-    response = openai.ChatCompletion.create(
+    response = openai.chat.completions.create(
         model="gpt-4",
         messages=[
-            {"role": "system", "content": "You are an expert at analyzing interviews."},
+            {"role": "system", "content": "You are an expert at analyzing interviews and providing thoughtful feedback."},
             {"role": "user", "content": prompt}
         ],
         max_tokens=1500
