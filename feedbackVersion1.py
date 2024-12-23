@@ -33,23 +33,28 @@ def transcribe_audio(file_path):
     return response.text
 
 # Function: Generate Feedback
-def generate_feedback(interview_text, job_description, company_name):
-    max_input_length = 3000  # Adjust this based on your token limits
-    truncated_interview_text = interview_text[:max_input_length]
 
+def generate_feedback(interview_text, job_description, company_name):
     prompt = f"""
     You are an expert interviewer and career coach. Analyze the candidate's interview performance for the position at {company_name}. 
-    Consider the following:
-    1. How well does the candidate's response align with the job description? ({job_description})
+    Evaluate the following criteria on a scale of 0 to 100:
+    1. Alignment of the candidate's response with the job description: ({job_description})
     2. Clarity of communication and confidence.
     3. Strength of their responses to key questions.
     4. Areas of improvement with actionable advice.
-    5. Overall assessment and a score out of 100.
+    5. Overall assessment and a final score out of 100.
+
+    For each criterion, provide a detailed explanation and the individual score.
 
     Interview Transcript:
     {interview_text}
 
-    Provide detailed feedback and a gamified score.
+    Provide your analysis in the following format:
+    - Alignment Score: [Score/100], Explanation
+    - Clarity Score: [Score/100], Explanation
+    - Strength Score: [Score/100], Explanation
+    - Areas of Improvement: [Explanation]
+    - Overall Score: [Score/100], Explanation
     """
     response = openai.chat.completions.create(
         model="gpt-4",
