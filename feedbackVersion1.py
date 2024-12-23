@@ -105,19 +105,18 @@ if uploaded_audio and job_description and company_name and openai_api_key:
         st.write(feedback)
 
         # Extract individual scores
+        scores={}
         try:
-            scores = {
-                "Alignment": int(feedback.split("Alignment Score:")[1].split("/")[0].strip()),
-                "Clarity": int(feedback.split("Clarity Score:")[1].split("/")[0].strip()),
-                "Strength": int(feedback.split("Strength Score:")[1].split("/")[0].strip()),
-                "Overall": int(feedback.split("Overall Score:")[1].split("/")[0].strip()),
-            }
-
+            for criterion in ["Alignment", "Clarity", "Strength", "Overall"]:
+                score_line = next(line for line in feedback.split("\n") if criterion in line)
+                score = int(score_line.split(":")[1].split("/")[0].strip())
+                scores[criterion] = score
+            
             # Display metrics
-            st.metric("Alignment Score", f"{scores['Alignment']}/100")
-            st.metric("Clarity Score", f"{scores['Clarity']}/100")
-            st.metric("Strength Score", f"{scores['Strength']}/100")
-            st.metric("Overall Score", f"{scores['Overall']}/100")
+            st.metric("Alignment Score", f"{scores.get('Alignment', 'N/A')}/100")
+            st.metric("Clarity Score", f"{scores.get('Clarity', 'N/A')}/100")
+            st.metric("Strength Score", f"{scores.get('Strength', 'N/A')}/100")
+            st.metric("Overall Score", f"{scores.get('Overall', 'N/A')}/100")
 
             # Display bar chart
             st.subheader("Score Breakdown")
