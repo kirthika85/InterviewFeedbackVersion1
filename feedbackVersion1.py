@@ -4,7 +4,7 @@ import os
 import pandas as pd
 
 # Streamlit App Title
-st.title("Interview Feedback AI Agent")
+st.title("Interview Feedback Generator")
 
 # Sidebar: OpenAI API Key
 st.sidebar.header("Settings")
