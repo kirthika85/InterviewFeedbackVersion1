@@ -1,6 +1,7 @@
 import streamlit as st
 import openai
 import os
+import pandas as pd  # For preparing data for the bar chart
 
 # Streamlit App Title
 st.title("Interview Feedback Generator")
@@ -82,23 +83,34 @@ if uploaded_audio and job_description and company_name and openai_api_key:
         feedback = generate_feedback(transcribed_text, job_description, company_name)
         st.success("Feedback generated!")
 
-        # Display feedback and gamified score
-        st.subheader("Interview Feedback and Score")
+        # Display feedback
+        st.subheader("Interview Feedback")
         st.write(feedback)
 
-        # Gamification
+        # Extract individual scores and display as metrics
         try:
-            # Extract individual scores from the feedback text
             alignment_score = int(feedback.split("Alignment Score:")[1].split("/")[0].strip())
             clarity_score = int(feedback.split("Clarity Score:")[1].split("/")[0].strip())
             strength_score = int(feedback.split("Strength Score:")[1].split("/")[0].strip())
             overall_score = int(feedback.split("Overall Score:")[1].split("/")[0].strip())
 
-            # Display individual scores
+            # Display scores as metrics
             st.metric("Alignment Score", f"{alignment_score}/100")
             st.metric("Clarity Score", f"{clarity_score}/100")
             st.metric("Strength Score", f"{strength_score}/100")
             st.metric("Overall Score", f"{overall_score}/100")
+
+            # Prepare data for the bar chart
+            scores = {
+                "Alignment": alignment_score,
+                "Clarity": clarity_score,
+                "Strength": strength_score,
+                "Overall": overall_score,
+            }
+
+            # Display bar chart
+            st.subheader("Score Breakdown")
+            st.bar_chart(pd.DataFrame(scores.values(), index=scores.keys(), columns=["Score"]))
 
             # Gamification based on overall score
             if overall_score > 80:
@@ -108,11 +120,12 @@ if uploaded_audio and job_description and company_name and openai_api_key:
                 st.info("Good effort! Keep improving.")
             else:
                 st.warning("Needs Improvement. Focus on the provided feedback.")
+
         except Exception as e:
             st.warning("Score not available in feedback. Please check the feedback format.")
 
-            # Cleanup
-            os.remove(audio_file_path)
+        # Cleanup
+        os.remove(audio_file_path)
 
     except Exception as e:
         st.error(f"Error occurred: {e}")
