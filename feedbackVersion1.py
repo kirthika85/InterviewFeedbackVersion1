@@ -33,7 +33,6 @@ def transcribe_audio(file_path):
     return response.text
 
 # Function: Generate Feedback
-
 def generate_feedback(interview_text, job_description, company_name):
     prompt = f"""
     You are an expert interviewer and career coach. Analyze the candidate's interview performance for the position at {company_name}. 
@@ -44,17 +43,12 @@ def generate_feedback(interview_text, job_description, company_name):
     4. Areas of improvement with actionable advice.
     5. Overall assessment and a final score out of 100.
 
-    For each criterion, provide a detailed explanation and the individual score.
-
-    Interview Transcript:
-    {interview_text}
-
-    Provide your analysis in the following format:
-    - Alignment Score: [Score/100], Explanation
-    - Clarity Score: [Score/100], Explanation
-    - Strength Score: [Score/100], Explanation
+    For each criterion, provide a detailed explanation and the individual score in the following format:
+    - Alignment Score: [Score/100]
+    - Clarity Score: [Score/100]
+    - Strength Score: [Score/100]
+    - Overall Score: [Score/100]
     - Areas of Improvement: [Explanation]
-    - Overall Score: [Score/100], Explanation
     """
     response = openai.chat.completions.create(
         model="gpt-4",
@@ -94,24 +88,31 @@ if uploaded_audio and job_description and company_name and openai_api_key:
 
         # Gamification
         try:
-            score = int(feedback.split()[-1])  # Extract score if included at the end
-        except ValueError:
-            score = None
-        
-        if score:
-            st.metric("Your Score", f"{score}/100")
-            if score > 80:
+            # Extract individual scores from the feedback text
+            alignment_score = int(feedback.split("Alignment Score:")[1].split("/")[0].strip())
+            clarity_score = int(feedback.split("Clarity Score:")[1].split("/")[0].strip())
+            strength_score = int(feedback.split("Strength Score:")[1].split("/")[0].strip())
+            overall_score = int(feedback.split("Overall Score:")[1].split("/")[0].strip())
+
+            # Display individual scores
+            st.metric("Alignment Score", f"{alignment_score}/100")
+            st.metric("Clarity Score", f"{clarity_score}/100")
+            st.metric("Strength Score", f"{strength_score}/100")
+            st.metric("Overall Score", f"{overall_score}/100")
+
+            # Gamification based on overall score
+            if overall_score > 80:
                 st.balloons()
                 st.success("Great Job! You're a strong candidate.")
-            elif score > 50:
+            elif overall_score > 50:
                 st.info("Good effort! Keep improving.")
             else:
                 st.warning("Needs Improvement. Focus on the provided feedback.")
-        else:
-            st.warning("Score not available in feedback.")
+        except Exception as e:
+            st.warning("Score not available in feedback. Please check the feedback format.")
 
-        # Cleanup
-        os.remove(audio_file_path)
+            # Cleanup
+            os.remove(audio_file_path)
 
     except Exception as e:
         st.error(f"Error occurred: {e}")
