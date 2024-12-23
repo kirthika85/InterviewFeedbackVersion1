@@ -42,6 +42,11 @@ def transcribe_audio(file_path):
 def generate_feedback(interview_text, job_description, company_name):
     prompt = f"""
     You are an expert interviewer and career coach. Analyze the candidate's interview performance for the position at {company_name}. 
+    The interview text provided is as follows:
+
+    {interview_text}
+
+    
     Evaluate the following criteria on a scale of 0 to 100:
     1. Alignment of the candidate's response with the job description: ({job_description})
     2. Clarity of communication and confidence.
