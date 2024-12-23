@@ -26,12 +26,13 @@ uploaded_audio = st.file_uploader("Upload your audio file (mp3, wav, etc.)", typ
 
 # Function: Transcribe Audio
 def transcribe_audio(file_path):
-    with open(file_path, "rb") as audio:
-        response = openai.audio.transcriptions.create(
-            model="whisper-1",
-            file=audio
-        )
-    return response.text
+    try:
+        with open(file_path, "rb") as audio:
+            response = openai.Audio.transcribe(model="whisper-1", file=audio)
+        return response["text"]
+    except Exception as e:
+        st.error(f"Error in audio transcription: {e}")
+        return None
 
 # Function: Generate Feedback
 def generate_feedback(interview_text, job_description, company_name):
@@ -51,15 +52,19 @@ def generate_feedback(interview_text, job_description, company_name):
     - Overall Score: [Score/100]
     - Areas of Improvement: [Explanation]
     """
-    response = openai.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are an expert at analyzing interviews and providing thoughtful feedback."},
-            {"role": "user", "content": prompt}
-        ],
-        max_tokens=1500
-    )
-    return response.choices[0].message.content
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are an expert at analyzing interviews and providing thoughtful feedback."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=1500
+        )
+        return response.choices[0].message["content"]
+    except Exception as e:
+        st.error(f"Error generating feedback: {e}")
+        return None
 
 # Main Workflow
 if uploaded_audio and job_description and company_name and openai_api_key:
@@ -72,6 +77,10 @@ if uploaded_audio and job_description and company_name and openai_api_key:
         # Transcribe the audio
         st.info("Transcribing audio...")
         transcribed_text = transcribe_audio(audio_file_path)
+        if not transcribed_text:
+            st.warning("Transcription failed. Please check your audio file.")
+            os.remove(audio_file_path)
+            st.stop()
         st.success("Transcription completed!")
 
         # Display transcribed text
@@ -81,48 +90,47 @@ if uploaded_audio and job_description and company_name and openai_api_key:
         # Generate feedback
         st.info("Generating feedback based on the interview and job description...")
         feedback = generate_feedback(transcribed_text, job_description, company_name)
+        if not feedback:
+            st.warning("Feedback generation failed. Please try again.")
+            os.remove(audio_file_path)
+            st.stop()
         st.success("Feedback generated!")
 
         # Display feedback
         st.subheader("Interview Feedback")
         st.write(feedback)
 
-        # Extract individual scores and display as metrics
+        # Extract individual scores
         try:
-            alignment_score = int(feedback.split("Alignment Score:")[1].split("/")[0].strip())
-            clarity_score = int(feedback.split("Clarity Score:")[1].split("/")[0].strip())
-            strength_score = int(feedback.split("Strength Score:")[1].split("/")[0].strip())
-            overall_score = int(feedback.split("Overall Score:")[1].split("/")[0].strip())
-
-            # Display scores as metrics
-            st.metric("Alignment Score", f"{alignment_score}/100")
-            st.metric("Clarity Score", f"{clarity_score}/100")
-            st.metric("Strength Score", f"{strength_score}/100")
-            st.metric("Overall Score", f"{overall_score}/100")
-
-            # Prepare data for the bar chart
             scores = {
-                "Alignment": alignment_score,
-                "Clarity": clarity_score,
-                "Strength": strength_score,
-                "Overall": overall_score,
+                "Alignment": int(feedback.split("Alignment Score:")[1].split("/")[0].strip()),
+                "Clarity": int(feedback.split("Clarity Score:")[1].split("/")[0].strip()),
+                "Strength": int(feedback.split("Strength Score:")[1].split("/")[0].strip()),
+                "Overall": int(feedback.split("Overall Score:")[1].split("/")[0].strip()),
             }
+
+            # Display metrics
+            st.metric("Alignment Score", f"{scores['Alignment']}/100")
+            st.metric("Clarity Score", f"{scores['Clarity']}/100")
+            st.metric("Strength Score", f"{scores['Strength']}/100")
+            st.metric("Overall Score", f"{scores['Overall']}/100")
 
             # Display bar chart
             st.subheader("Score Breakdown")
             st.bar_chart(pd.DataFrame(scores.values(), index=scores.keys(), columns=["Score"]))
 
-            # Gamification based on overall score
-            if overall_score > 80:
+            # Gamification
+            if scores["Overall"] > 80:
                 st.balloons()
                 st.success("Great Job! You're a strong candidate.")
-            elif overall_score > 50:
+            elif scores["Overall"] > 50:
                 st.info("Good effort! Keep improving.")
             else:
                 st.warning("Needs Improvement. Focus on the provided feedback.")
 
         except Exception as e:
-            st.warning("Score not available in feedback. Please check the feedback format.")
+            st.warning("Could not extract scores from feedback. Please check the feedback format.")
+            st.error(f"Error: {e}")
 
         # Cleanup
         os.remove(audio_file_path)
