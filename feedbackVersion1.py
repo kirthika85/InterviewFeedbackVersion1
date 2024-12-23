@@ -2,9 +2,10 @@ import streamlit as st
 import openai
 import os
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # Streamlit App Title
-st.title("Interview Feedback Generator")
+st.title("Interview Feedback AI Agent")
 
 # Sidebar: OpenAI API Key
 st.sidebar.header("Settings")
@@ -138,10 +139,16 @@ def agent_interaction():
                     st.metric("Strength Score", f"{scores.get('Strength', 'N/A')}/100")
                     st.metric("Overall Score", f"{scores.get('Overall', 'N/A')}/100")
 
-                # Display bar chart with customizations
+                # Display pie chart for scores
                 st.subheader("Score Breakdown")
-                score_df = pd.DataFrame(scores.values(), index=scores.keys(), columns=["Score"])
-                st.bar_chart(score_df, use_container_width=True)
+                score_labels = list(scores.keys())
+                score_values = list(scores.values())
+
+                # Plot pie chart using Matplotlib
+                fig, ax = plt.subplots()
+                ax.pie(score_values, labels=score_labels, autopct='%1.1f%%', startangle=90, colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'])
+                ax.axis('equal')  # Equal aspect ratio ensures that pie chart is drawn as a circle.
+                st.pyplot(fig)
 
                 # Gamification
                 if scores["Overall"] > 80:
