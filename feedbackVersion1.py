@@ -28,11 +28,13 @@ uploaded_audio = st.file_uploader("Upload your audio file (mp3, wav, etc.)", typ
 def transcribe_audio(file_path):
     try:
         with open(file_path, "rb") as audio:
-            response = openai.Audio.transcribe(model="whisper-1", file=audio)
-        return response["text"]
+            # Using the 'whisper-1' model to transcribe audio
+            response = openai.Audio.transcribe(file=audio, model="whisper-1")
+        return response['text']
     except Exception as e:
         st.error(f"Error in audio transcription: {e}")
         return None
+
 
 # Function: Generate Feedback
 def generate_feedback(interview_text, job_description, company_name):
