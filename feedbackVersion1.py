@@ -61,10 +61,6 @@ def generate_feedback(interview_text, job_description, company_name):
     )
     return response.choices[0].message.content
 
-# Transcription Limit Warning
-if len(job_description) > 1000 or (uploaded_audio and os.path.getsize(audio_file_path) > 10 * 1024 * 1024):
-    st.warning("Input too large. Please provide a shorter job description or smaller audio file.")
-
 # Main Workflow
 if uploaded_audio and job_description and company_name and openai_api_key:
     try:
