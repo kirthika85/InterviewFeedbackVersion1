@@ -150,43 +150,48 @@ else:
                 try:
                     result = agent.run({"file_path": audio_file_path, "job_description": job_description, "company_name": company_name, "task_description": task_description})
 
-                    # Display results in tabs
-                    tab1, tab2 = st.tabs(["Feedback Analysis", "Score Analysis"])
+                    if "This text does not appear to be an interview" in result:
+                        st.subheader("Transcription")
+                        st.write(transcription)
+                        st.warning("The audio file does not appear to contain an interview.")
+                    else:
+                        # Display results in tabs
+                        tab1, tab2 = st.tabs(["Feedback Analysis", "Score Analysis"])
 
-                    with tab1:
-                        st.subheader("Feedback Analysis")
-                        st.write(result)
+                        with tab1:
+                            st.subheader("Feedback Analysis")
+                            st.write(result)
 
-                        # Extract and display scores
-                        scores = {}
-                        score_pattern = re.compile(r"(\w+)\s*Score:\s*(\d+)\s*/\s*100")
-                        matches = score_pattern.findall(result)
+                            # Extract and display scores
+                            scores = {}
+                            score_pattern = re.compile(r"(\w+)\s*Score:\s*(\d+)\s*/\s*100")
+                            matches = score_pattern.findall(result)
 
-                        if matches:
-                            scores = {match[0]: int(match[1]) for match in matches}
-                            for criterion, score in scores.items():
-                                st.write(f"{criterion} Score: {score}/100")
+                            if matches:
+                                scores = {match[0]: int(match[1]) for match in matches}
+                                for criterion, score in scores.items():
+                                    st.write(f"{criterion} Score: {score}/100")
 
-                    with tab2:
-                        st.subheader("Score Analysis")
+                        with tab2:
+                            st.subheader("Score Analysis")
 
-                        if scores:
-                            # Ensure no score is zero before plotting
-                            if all(value > 0 for value in scores.values()):
-                                fig, ax = plt.subplots()
-                                ax.pie(
-                                    scores.values(),
-                                    labels=scores.keys(),
-                                    autopct='%1.1f%%',
-                                    startangle=90,
-                                    colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'],
-                                )
-                                ax.axis('equal')
-                                st.pyplot(fig)
+                            if scores:
+                                # Ensure no score is zero before plotting
+                                if all(value > 0 for value in scores.values()):
+                                    fig, ax = plt.subplots()
+                                    ax.pie(
+                                        scores.values(),
+                                        labels=scores.keys(),
+                                        autopct='%1.1f%%',
+                                        startangle=90,
+                                        colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'],
+                                    )
+                                    ax.axis('equal')
+                                    st.pyplot(fig)
+                                else:
+                                    st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
                             else:
-                                st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
-                        else:
-                            st.warning("No scores were detected in the feedback.")
+                                st.warning("No scores were detected in the feedback.")
 
                 except Exception as e:
                     st.error(f"Error in processing: {e}")
