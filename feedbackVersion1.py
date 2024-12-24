@@ -19,6 +19,7 @@ with st.sidebar:
 if not openai_api_key:
     st.warning("Please enter your OpenAI API key to proceed.")
 else:
+    openai.api_key = openai_api_key
     # Initialize OpenAI Model
     llm = OpenAI(openai_api_key=openai_api_key, temperature=0.7, model="gpt-4")
 
