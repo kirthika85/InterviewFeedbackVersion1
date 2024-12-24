@@ -26,16 +26,16 @@ else:
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
     # Tool: Transcribe Audio
-    def transcribe_audio_tool(file_path):
+    def transcribe_audio(file_path):
         try:
             with open(file_path, "rb") as audio:
-                response = openai.audio.transcriptions.create(model="whisper-1", file=audio)
-            return response.text
+                response = openai.Audio.transcribe("whisper-1", audio)
+            return response["text"]
         except Exception as e:
             return f"Error in audio transcription: {e}"
 
     # Tool: Generate Feedback
-    def generate_feedback_tool(interview_text, job_description, company_name):
+    def generate_feedback(interview_text, job_description, company_name):
         prompt = f"""
         You are an expert interviewer and career coach. Analyze the candidate's interview performance for the position at {company_name}.
         The interview text provided is as follows:
@@ -57,12 +57,12 @@ else:
         - Areas of Improvement: [Explanation]
         """
         try:
-            response = openai.chat.completions.create(
+            response = openai.ChatCompletion.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=2000,
             )
-            return response.choices[0].message.content
+            return response["choices"][0]["message"]["content"]
         except Exception as e:
             return f"Error generating feedback: {e}"
 
@@ -70,12 +70,14 @@ else:
     tools = [
         Tool(
             name="Transcribe Audio",
-            func=lambda q: transcribe_audio_tool(q) if isinstance(q, str) else "Invalid input.",
+            func=transcribe_audio,
             description="Converts uploaded audio files into text.",
         ),
         Tool(
             name="Generate Feedback",
-            func=lambda q: generate_feedback_tool(q['interview_text'], q['job_description'], q['company_name']),
+            func=lambda inputs: generate_feedback(
+                inputs["interview_text"], inputs["job_description"], inputs["company_name"]
+            ),
             description="Analyzes interview transcription and provides detailed feedback.",
         ),
     ]
@@ -106,68 +108,27 @@ else:
             with open(audio_file_path, "wb") as f:
                 f.write(uploaded_audio.read())
 
-            # Use the Agent for Transcription
+            # Transcription
             with st.spinner("Transcribing audio..."):
-                transcription_result = agent.run({"input": audio_file_path})
-                st.success("Transcription completed!")
+                transcription_result = transcribe_audio(audio_file_path)
+                if "Error" in transcription_result:
+                    st.error(transcription_result)
+                    os.remove(audio_file_path)
+                    st.stop()
 
-            # Check transcription validity
-            if "Error" in transcription_result:
-                st.error(transcription_result)
-            else:
-                st.info("Generating feedback...")
-                feedback_request = {
-                    "interview_text": transcription_result,
-                    "job_description": job_description,
-                    "company_name": company_name,
-                }
+            # Feedback Generation
+            with st.spinner("Generating feedback..."):
+                feedback_result = generate_feedback(
+                    transcription_result, job_description, company_name
+                )
+                if "Error" in feedback_result:
+                    st.error(feedback_result)
+                    os.remove(audio_file_path)
+                    st.stop()
 
-                # Use the Agent for Feedback Generation
-                feedback_result = agent.run({"input": feedback_request})
-                st.success("Feedback generated!")
+            # Display Results
+            st.success("Analysis completed!")
+            st.subheader("Feedback")
+            st.write(feedback_result)
 
-                # Display Results
-                tab1, tab2 = st.tabs(["Feedback", "Score Analysis"])
-
-                with tab1:
-                    st.subheader("Interview Feedback")
-                    st.write(feedback_result)
-
-                with tab2:
-                    # Extract Scores and Plot
-                    st.subheader("Score Breakdown")
-                    scores = {}
-                    try:
-                        for criterion in ["Alignment", "Clarity", "Strength", "Overall"]:
-                            score_line = next((line for line in feedback_result.split("\n") if criterion in line), None)
-                            if score_line:
-                                score = int(score_line.split(":")[1].split("/")[0].strip())
-                                scores[criterion] = score
-                            else:
-                                scores[criterion] = None
-
-                        # Display Metrics
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            st.metric("Alignment Score", f"{scores.get('Alignment', 'N/A')}/100")
-                            st.metric("Clarity Score", f"{scores.get('Clarity', 'N/A')}/100")
-                        with col2:
-                            st.metric("Strength Score", f"{scores.get('Strength', 'N/A')}/100")
-                            st.metric("Overall Score", f"{scores.get('Overall', 'N/A')}/100")
-
-                        # Plot Pie Chart
-                        if all(scores[criterion] is not None for criterion in scores):
-                            fig, ax = plt.subplots()
-                            ax.pie(
-                                list(scores.values()),
-                                labels=scores.keys(),
-                                autopct='%1.1f%%',
-                                startangle=90,
-                                colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'],
-                            )
-                            ax.axis('equal')
-                            st.pyplot(fig)
-                        else:
-                            st.warning("Some scores are missing. Pie chart visualization is not possible.")
-                    except Exception as e:
-                        st.error(f"Could not extract scores: {e}")
+            os.remove(audio_file_path)
