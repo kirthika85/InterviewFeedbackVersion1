@@ -142,13 +142,14 @@ else:
                     st.subheader("Score Breakdown")
                     scores = {}
                     try:
+                        score_pattern = re.compile(r"(\w+)\s*Score:\s*(\d+)\s*/\s*100")
+                        matches = score_pattern.findall(feedback_result)
+
+                        scores = {match[0]: int(match[1]) for match in matches}
+                        
                         for criterion in ["Alignment", "Clarity", "Strength", "Overall"]:
-                            score_line = next((line for line in feedback_result.split("\n") if criterion in line), None)
-                            if score_line:
-                                score = int(score_line.split(":")[1].split("/")[0].strip())
-                                scores[criterion] = score
-                            else:
-                                scores[criterion] = None
+                                if criterion not in scores:
+                                    scores[criterion] = None
 
                         # Display Metrics
                         col1, col2 = st.columns(2)
