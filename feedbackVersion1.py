@@ -3,7 +3,7 @@ import openai
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-from langchain import OpenAI
+from langchain_community import OpenAI
 from langchain.agents import initialize_agent, Tool
 from langchain.prompts import PromptTemplate
 from langchain.chains.conversation.memory import ConversationBufferMemory
