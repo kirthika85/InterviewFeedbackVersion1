@@ -136,9 +136,7 @@ else:
                     st.subheader("Interview Feedback")
                     st.write(feedback_result)
                     st.success("Analysis completed!")
-                    st.subheader("Feedback")
-                    st.write(feedback_result)
-                  
+                
             with tab2:
                     # Extract Scores and Plot
                     st.subheader("Score Breakdown")
