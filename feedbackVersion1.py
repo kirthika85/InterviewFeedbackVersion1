@@ -162,7 +162,7 @@ else:
                             st.metric("Overall Score", f"{scores.get('Overall', 0)}/100")
 
                         # Plot Pie Chart
-                        if all(value is not None for value in scores.values()):
+                        if all(value is not 0 for value in scores.values()):
                             fig, ax = plt.subplots()
                             ax.pie(
                                 list(scores.values()),
