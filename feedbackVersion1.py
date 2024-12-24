@@ -93,19 +93,22 @@ else:
         Tool(
             name="Transcribe Audio",
             func=lambda file_path: transcribe_audio(file_path),
-            description="Converts an audio file at the given file path into text transcription.",
+            description="Transcribe an audio file. Provide the file path in the query.",
         ),
         Tool(
             name="Classify Text",
             func=lambda text: is_interview(text),
-            description="Determines if the transcribed text represents an interview conversation.",
+            description="Classify text to determine if it represents an interview. Include the text in the query.",
         ),
         Tool(
             name="Generate Feedback",
             func=lambda inputs: generate_feedback(
                 inputs["interview_text"], inputs["job_description"], inputs["company_name"]
             ),
-            description="Analyzes interview transcription and provides detailed feedback based on the job description and company name.",
+            description=(
+                "Generate feedback for interview transcription. Query must provide the interview text, "
+                "job description, and company name."
+            ),
         ),
     ]
 
@@ -136,47 +139,45 @@ else:
             with open(audio_file_path, "wb") as f:
                 f.write(uploaded_audio.read())
 
-            # Agent Task Description
-            task_description = f"""
-            I have uploaded an audio file. Your task is to:
-            1. Transcribe the audio.
-            2. Determine if the transcription is from an interview.
-            3. If it is an interview, generate feedback based on the job description: "{job_description}" and company name: "{company_name}".
-            4. If it is not an interview, display only the transcription.
+            # Query for the Agent
+            query = f"""
+            Analyze the audio file uploaded. 
+            1. Transcribe the audio file located at '{audio_file_path}'.
+            2. Classify if the transcription is an interview.
+            3. If it is an interview, provide feedback using the job description: "{job_description}" and company name: "{company_name}".
+            4. If it is not an interview, only display the transcription.
             """
 
-            # Let the agent decide which tools to use
+            # Run the Agent
             with st.spinner("Analyzing..."):
                 try:
-                    result = agent.run({"file_path": audio_file_path, "job_description": job_description, "company_name": company_name, "task_description": task_description})
+                    result = agent.run(query)
 
                     if "This text does not appear to be an interview" in result:
                         st.subheader("Transcription")
-                        st.write(transcription)
+                        st.write(result)
                         st.warning("The audio file does not appear to contain an interview.")
                     else:
-                        # Display results in tabs
+                        # Display Feedback and Scores
                         tab1, tab2 = st.tabs(["Feedback Analysis", "Score Analysis"])
 
                         with tab1:
                             st.subheader("Feedback Analysis")
                             st.write(result)
 
-                            # Extract and display scores
+                        with tab2:
+                            # Extract Scores
                             scores = {}
                             score_pattern = re.compile(r"(\w+)\s*Score:\s*(\d+)\s*/\s*100")
                             matches = score_pattern.findall(result)
 
                             if matches:
                                 scores = {match[0]: int(match[1]) for match in matches}
+                                st.subheader("Score Breakdown")
                                 for criterion, score in scores.items():
                                     st.write(f"{criterion} Score: {score}/100")
 
-                        with tab2:
-                            st.subheader("Score Analysis")
-
-                            if scores:
-                                # Ensure no score is zero before plotting
+                                # Plot Pie Chart
                                 if all(value > 0 for value in scores.values()):
                                     fig, ax = plt.subplots()
                                     ax.pie(
@@ -191,8 +192,7 @@ else:
                                 else:
                                     st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
                             else:
-                                st.warning("No scores were detected in the feedback.")
-
+                                st.warning("No scores detected in the feedback.")
                 except Exception as e:
                     st.error(f"Error in processing: {e}")
 
