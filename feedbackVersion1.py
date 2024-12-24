@@ -177,4 +177,4 @@ else:
                             st.warning("Some scores are missing. Pie chart visualization is not possible.")
                     except Exception as e:
                         st.error(f"Could not extract scores: {e}")
-              os.remove(audio_file_path)          
+            os.remove(audio_file_path)          
