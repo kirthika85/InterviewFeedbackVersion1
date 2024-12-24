@@ -131,8 +131,50 @@ else:
                     st.stop()
 
             # Display Results
-            st.success("Analysis completed!")
-            st.subheader("Feedback")
-            st.write(feedback_result)
+            tab1, tab2 = st.tabs(["Feedback", "Score Analysis"])
+            with tab1:
+                    st.subheader("Interview Feedback")
+                    st.write(feedback_result)
+                    st.success("Analysis completed!")
+                    st.subheader("Feedback")
+                    st.write(feedback_result)
+                  
+            with tab2:
+                    # Extract Scores and Plot
+                    st.subheader("Score Breakdown")
+                    scores = {}
+                    try:
+                        for criterion in ["Alignment", "Clarity", "Strength", "Overall"]:
+                            score_line = next((line for line in feedback_result.split("\n") if criterion in line), None)
+                            if score_line:
+                                score = int(score_line.split(":")[1].split("/")[0].strip())
+                                scores[criterion] = score
+                            else:
+                                scores[criterion] = None
 
-            os.remove(audio_file_path)
+                        # Display Metrics
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.metric("Alignment Score", f"{scores.get('Alignment', 'N/A')}/100")
+                            st.metric("Clarity Score", f"{scores.get('Clarity', 'N/A')}/100")
+                        with col2:
+                            st.metric("Strength Score", f"{scores.get('Strength', 'N/A')}/100")
+                            st.metric("Overall Score", f"{scores.get('Overall', 'N/A')}/100")
+
+                        # Plot Pie Chart
+                        if all(scores[criterion] is not None for criterion in scores):
+                            fig, ax = plt.subplots()
+                            ax.pie(
+                                list(scores.values()),
+                                labels=scores.keys(),
+                                autopct='%1.1f%%',
+                                startangle=90,
+                                colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'],
+                            )
+                            ax.axis('equal')
+                            st.pyplot(fig)
+                        else:
+                            st.warning("Some scores are missing. Pie chart visualization is not possible.")
+                    except Exception as e:
+                        st.error(f"Could not extract scores: {e}")
+              os.remove(audio_file_path)          
