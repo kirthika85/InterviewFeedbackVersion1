@@ -61,12 +61,12 @@ else:
         - Areas of Improvement: [Explanation]
         """
         try:
-            response = openai.ChatCompletion.create(
+            response = openai.chat.completions.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=2000,
             )
-            return response["choices"][0]["message"]["content"]
+            return response.choices[0].message.content
         except Exception as e:
             return f"Error generating feedback: {e}"
 
