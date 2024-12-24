@@ -123,11 +123,14 @@ def agent_interaction():
                 scores = {}
                 try:
                     for criterion in ["Alignment", "Clarity", "Strength", "Overall"]:
-                        score_line = next(line for line in feedback.split("\n") if criterion in line)
-                        score = int(score_line.split(":")[1].split("/")[0].strip())
-                        scores[criterion] = score
+                        score_line = next((line for line in feedback.split("\n") if criterion in line), None)
+                        if score_line:
+                            score = int(score_line.split(":")[1].split("/")[0].strip())
+                            scores[criterion] = score
+                        else:
+                            scores[criterion] = None
 
-                    # Display metrics
+                    # Display metrics in columns for a side by side view
                     col1, col2 = st.columns(2)
                     with col1:
                         st.metric("Alignment Score", f"{scores.get('Alignment', 'N/A')}/100")
@@ -137,14 +140,17 @@ def agent_interaction():
                         st.metric("Overall Score", f"{scores.get('Overall', 'N/A')}/100")
 
                     # Plot pie chart
-                    score_labels = list(scores.keys())
-                    score_values = list(scores.values())
+                    if all(scores[criterion] is not None for criterion in scores):
+                        score_labels = list(scores.keys())
+                        score_values = [score for score in scores.values() if score is not None]
 
-                    fig, ax = plt.subplots()
-                    ax.pie(score_values, labels=score_labels, autopct='%1.1f%%', startangle=90,
+                        fig, ax = plt.subplots()
+                        ax.pie(score_values, labels=score_labels, autopct='%1.1f%%', startangle=90,
                            colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'])
-                    ax.axis('equal')
-                    st.pyplot(fig)
+                        ax.axis('equal')
+                        st.pyplot(fig)
+                    else:
+                        st.warning("Some scores are missing. Pie chart visualization is not possible.")
 
                 except Exception as e:
                     st.warning("Could not extract scores from feedback.")
