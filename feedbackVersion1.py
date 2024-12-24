@@ -150,19 +150,19 @@ else:
                         
                         for criterion in ["Alignment", "Clarity", "Strength", "Overall"]:
                                 if criterion not in scores:
-                                    scores[criterion] = None
+                                    scores[criterion] = 0
 
                         # Display Metrics
                         col1, col2 = st.columns(2)
                         with col1:
-                            st.metric("Alignment Score", f"{scores.get('Alignment', 'N/A')}/100")
-                            st.metric("Clarity Score", f"{scores.get('Clarity', 'N/A')}/100")
+                            st.metric("Alignment Score", f"{scores.get('Alignment', 0)}/100")
+                            st.metric("Clarity Score", f"{scores.get('Clarity', 0)}/100")
                         with col2:
-                            st.metric("Strength Score", f"{scores.get('Strength', 'N/A')}/100")
-                            st.metric("Overall Score", f"{scores.get('Overall', 'N/A')}/100")
+                            st.metric("Strength Score", f"{scores.get('Strength', 0)}/100")
+                            st.metric("Overall Score", f"{scores.get('Overall', 0)}/100")
 
                         # Plot Pie Chart
-                        if all(scores[criterion] is not None for criterion in scores):
+                        if all(value is not None for value in scores.values()):
                             fig, ax = plt.subplots()
                             ax.pie(
                                 list(scores.values()),
