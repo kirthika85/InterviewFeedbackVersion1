@@ -10,7 +10,7 @@ from langchain.chains.conversation.memory import ConversationBufferMemory
 import re
 
 # Streamlit Title
-st.title("Interview Feedback AI Agent")
+st.title("Interview Feedback Generator")
 
 # Sidebar: OpenAI API Key
 with st.sidebar:
