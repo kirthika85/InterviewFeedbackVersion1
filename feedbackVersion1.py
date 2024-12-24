@@ -1,6 +1,7 @@
 import streamlit as st
 import openai
 import os
+import tempfile
 import matplotlib.pyplot as plt
 from langchain.chat_models import ChatOpenAI  # Use ChatOpenAI for chat-based models
 from langchain.agents import initialize_agent, Tool
@@ -134,67 +135,73 @@ else:
         if not uploaded_audio:
             st.warning("Please upload an audio file.")
         else:
-            # Save uploaded audio file
-            audio_file_path = "uploaded_audio.mp3"
-            with open(audio_file_path, "wb") as f:
-                f.write(uploaded_audio.read())
+            # Use a temporary directory to save the uploaded file
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
+                temp_file.write(uploaded_audio.read())
+                audio_file_path = temp_file.name  # Get the full path of the saved file
 
-            # Query for the Agent
-            query = f"""
-            Analyze the audio file uploaded. 
-            1. Transcribe the audio file located at '{audio_file_path}'.
-            2. Classify if the transcription is an interview.
-            3. If it is an interview, provide feedback using the job description: "{job_description}" and company name: "{company_name}".
-            4. If it is not an interview, only display the transcription.
-            """
+            # Verify the file exists
+            if os.path.exists(audio_file_path):
+                st.success(f"Audio file saved to: {audio_file_path}")
 
-            # Run the Agent
-            with st.spinner("Analyzing..."):
-                try:
-                    result = agent.run(query)
+                # Query for the Agent
+                query = f"""
+                Analyze the audio file uploaded. 
+                1. Transcribe the audio file located at '{audio_file_path}'.
+                2. Classify if the transcription is an interview.
+                3. If it is an interview, provide feedback using the job description: "{job_description}" and company name: "{company_name}".
+                4. If it is not an interview, only display the transcription.
+                """
 
-                    if "This text does not appear to be an interview" in result:
-                        st.subheader("Transcription")
-                        st.write(result)
-                        st.warning("The audio file does not appear to contain an interview.")
-                    else:
-                        # Display Feedback and Scores
-                        tab1, tab2 = st.tabs(["Feedback Analysis", "Score Analysis"])
+                # Run the Agent
+                with st.spinner("Analyzing..."):
+                    try:
+                        result = agent.run(query)
 
-                        with tab1:
-                            st.subheader("Feedback Analysis")
+                        if "This text does not appear to be an interview" in result:
+                            st.subheader("Transcription")
                             st.write(result)
+                            st.warning("The audio file does not appear to contain an interview.")
+                        else:
+                            # Display Feedback and Scores
+                            tab1, tab2 = st.tabs(["Feedback Analysis", "Score Analysis"])
 
-                        with tab2:
-                            # Extract Scores
-                            scores = {}
-                            score_pattern = re.compile(r"(\w+)\s*Score:\s*(\d+)\s*/\s*100")
-                            matches = score_pattern.findall(result)
+                            with tab1:
+                                st.subheader("Feedback Analysis")
+                                st.write(result)
 
-                            if matches:
-                                scores = {match[0]: int(match[1]) for match in matches}
-                                st.subheader("Score Breakdown")
-                                for criterion, score in scores.items():
-                                    st.write(f"{criterion} Score: {score}/100")
+                            with tab2:
+                                # Extract Scores
+                                scores = {}
+                                score_pattern = re.compile(r"(\w+)\s*Score:\s*(\d+)\s*/\s*100")
+                                matches = score_pattern.findall(result)
 
-                                # Plot Pie Chart
-                                if all(value > 0 for value in scores.values()):
-                                    fig, ax = plt.subplots()
-                                    ax.pie(
-                                        scores.values(),
-                                        labels=scores.keys(),
-                                        autopct='%1.1f%%',
-                                        startangle=90,
-                                        colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'],
-                                    )
-                                    ax.axis('equal')
-                                    st.pyplot(fig)
+                                if matches:
+                                    scores = {match[0]: int(match[1]) for match in matches}
+                                    st.subheader("Score Breakdown")
+                                    for criterion, score in scores.items():
+                                        st.write(f"{criterion} Score: {score}/100")
+
+                                    # Plot Pie Chart
+                                    if all(value > 0 for value in scores.values()):
+                                        fig, ax = plt.subplots()
+                                        ax.pie(
+                                            scores.values(),
+                                            labels=scores.keys(),
+                                            autopct='%1.1f%%',
+                                            startangle=90,
+                                            colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'],
+                                        )
+                                        ax.axis('equal')
+                                        st.pyplot(fig)
+                                    else:
+                                        st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
                                 else:
-                                    st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
-                            else:
-                                st.warning("No scores detected in the feedback.")
-                except Exception as e:
-                    st.error(f"Error in processing: {e}")
+                                    st.warning("No scores detected in the feedback.")
+                    except Exception as e:
+                        st.error(f"Error in processing: {e}")
 
-            # Clean up
-            os.remove(audio_file_path)
+                # Clean up the temporary file
+                os.remove(audio_file_path)
+            else:
+                st.error("The uploaded audio file could not be located.")
