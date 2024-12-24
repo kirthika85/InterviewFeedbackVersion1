@@ -33,7 +33,7 @@ else:
                         model="whisper-1",
                         file=audio
                 )
-             return response.text
+            return response.text
         except Exception as e:
             return f"Error in audio transcription: {e}"
 
