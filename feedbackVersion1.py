@@ -137,6 +137,7 @@ else:
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
                     temp_file.write(uploaded_audio.read())
                     audio_file_path = temp_file.name
+                    st.write(f"Debug: Temporary audio file path is {audio_file_path}")
 
                 query = f"""
                 Analyze the audio file uploaded. 
