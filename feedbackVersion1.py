@@ -24,9 +24,9 @@ else:
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
     # Tool: Transcribe Audio
-    def transcribe_audio(file_path):
+    def transcribe_audio(audio_file_path):
         try:
-            with open(file_path, "rb") as audio:
+            with open(audio_file_path, "rb") as audio:
                 response = openai.audio.transcriptions.create(
                     model="whisper-1",
                     file=audio,
