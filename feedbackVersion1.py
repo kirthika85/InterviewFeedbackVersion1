@@ -1,12 +1,3 @@
-import streamlit as st
-import openai
-import os
-import matplotlib.pyplot as plt
-from langchain.llms import OpenAI
-from langchain.agents import initialize_agent, Tool
-from langchain.chains.conversation.memory import ConversationBufferMemory
-import re
-
 # Streamlit Title
 st.title("Interview Feedback Generator")
 
@@ -137,7 +128,7 @@ else:
                 f.write(uploaded_audio.read())
 
             # Agent Task Description
-            input_data = f"""
+            task_description = f"""
             I have uploaded an audio file. Your task is to:
             1. Transcribe the audio.
             2. Determine if the transcription is from an interview.
@@ -145,50 +136,52 @@ else:
             4. If it is not an interview, display only the transcription.
             """
 
-            # Let the agent decide which tools to use
-            with st.spinner("Analyzing..."):
-                try:
-                   result = agent.run({"input": input_data})
-                    # Display results in tabs
-                    tab1, tab2 = st.tabs(["Feedback Analysis", "Score Analysis"])
+            # Pass the structured 'input' to agent.run()
+            input_data = f"""
+            Please analyze the following task:
+            {task_description}
+            """
 
-                    with tab1:
-                        st.subheader("Feedback Analysis")
-                        st.write(result)
+            # Run agent with the 'input' key
+            result = agent.run({"input": input_data})
 
-                        # Extract and display scores
-                        scores = {}
-                        score_pattern = re.compile(r"(\w+)\s*Score:\s*(\d+)\s*/\s*100")
-                        matches = score_pattern.findall(result)
+            # Display results in tabs
+            tab1, tab2 = st.tabs(["Feedback Analysis", "Score Analysis"])
 
-                        if matches:
-                            scores = {match[0]: int(match[1]) for match in matches}
-                            for criterion, score in scores.items():
-                                st.write(f"{criterion} Score: {score}/100")
+            with tab1:
+                st.subheader("Feedback Analysis")
+                st.write(result)
 
-                    with tab2:
-                        st.subheader("Score Analysis")
+                # Extract and display scores
+                scores = {}
+                score_pattern = re.compile(r"(\w+)\s*Score:\s*(\d+)\s*/\s*100")
+                matches = score_pattern.findall(result)
 
-                        if scores:
-                            # Ensure no score is zero before plotting
-                            if all(value > 0 for value in scores.values()):
-                                fig, ax = plt.subplots()
-                                ax.pie(
-                                    scores.values(),
-                                    labels=scores.keys(),
-                                    autopct='%1.1f%%',
-                                    startangle=90,
-                                    colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'],
-                                )
-                                ax.axis('equal')
-                                st.pyplot(fig)
-                            else:
-                                st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
-                        else:
-                            st.warning("No scores were detected in the feedback.")
+                if matches:
+                    scores = {match[0]: int(match[1]) for match in matches}
+                    for criterion, score in scores.items():
+                        st.write(f"{criterion} Score: {score}/100")
 
-                except Exception as e:
-                    st.error(f"Error in processing: {e}")
+            with tab2:
+                st.subheader("Score Analysis")
+
+                if scores:
+                    # Ensure no score is zero before plotting
+                    if all(value > 0 for value in scores.values()):
+                        fig, ax = plt.subplots()
+                        ax.pie(
+                            scores.values(),
+                            labels=scores.keys(),
+                            autopct='%1.1f%%',
+                            startangle=90,
+                            colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'],
+                        )
+                        ax.axis('equal')
+                        st.pyplot(fig)
+                    else:
+                        st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
+                else:
+                    st.warning("No scores were detected in the feedback.")
 
             # Clean up
             os.remove(audio_file_path)
