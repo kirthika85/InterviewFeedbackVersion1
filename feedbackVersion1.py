@@ -27,13 +27,16 @@ else:
     def transcribe_audio(audio_file_path):
         try:
             st.write(f"Debug: File exists before transcription? {os.path.exists(audio_file_path)}")
-            with open(audio_file_path, "rb") as audio:
-                response = openai.audio.transcriptions.create(
-                    model="whisper-1",
-                    file=audio,
-                )
-            st.write("Debug: Transcription API Response:", response.text)
-            return response.text
+            if os.path.exists(audio_file_path):
+                with open(audio_file_path, "rb") as audio:
+                    response = openai.audio.transcriptions.create(
+                        model="whisper-1",
+                        file=audio,
+                    )
+                st.write("Debug: Transcription API Response:", response.text)
+                return response.text
+            else:
+                return f"Error: File not found at {audio_file_path}"
         except Exception as e:
             return f"Error in audio transcription: {e}"
 
@@ -145,6 +148,8 @@ else:
                     st.write(f"Debug: Uploaded file size is {len(file_content)} bytes")
                     st.write(f"Debug: First 100 bytes of file content: {file_content[:100]}")
                     st.write(f"Debug: File exists after writing and closing? {os.path.exists(audio_file_path)}")
+                    transcription_result = transcribe_audio(audio_file_path)
+                    st.write("Transcription Result:", transcription_result)
 
 
                 query = f"""
