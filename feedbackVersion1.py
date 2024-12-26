@@ -137,7 +137,7 @@ else:
                 f.write(uploaded_audio.read())
 
             # Agent Task Description
-            task_description = f"""
+            input_data = f"""
             I have uploaded an audio file. Your task is to:
             1. Transcribe the audio.
             2. Determine if the transcription is from an interview.
@@ -148,8 +148,7 @@ else:
             # Let the agent decide which tools to use
             with st.spinner("Analyzing..."):
                 try:
-                    result = agent.run({"file_path": audio_file_path, "job_description": job_description, "company_name": company_name, "task_description": task_description})
-
+                   result = agent.run({"input": input_data})
                     # Display results in tabs
                     tab1, tab2 = st.tabs(["Feedback Analysis", "Score Analysis"])
 
