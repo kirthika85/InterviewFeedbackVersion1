@@ -1,4 +1,3 @@
-
 import streamlit as st
 import openai
 import os
@@ -138,18 +137,16 @@ else:
                 f.write(uploaded_audio.read())
 
             # Concatenate the necessary inputs into a single input
-            input_data = f"""
-            I have uploaded an audio file. Your task is to:
-            1. Transcribe the audio file located at {audio_file_path}.
-            2. Determine if the transcription is from an interview.
-            3. If it is an interview, generate feedback based on the job description: "{job_description}" and company name: "{company_name}".
-            4. If it is not an interview, display only the transcription.
-            """
-
-            # Run the agent with the single 'input' key
+            inputs = {
+            "file_path": audio_file_path,
+            "job_description": job_description,
+            "company_name": company_name,
+            "task_description": "I have uploaded an audio file. Your task is to transcribe the audio and determine if it is an interview."
+            }
+            #Run the agent with structured inputs
             with st.spinner("Analyzing..."):
                 try:
-                    result = agent.run({"input": input_data})  # Provide the input key here
+                    result = agent.run(inputs)  # Provide the input structure here
 
                     if "This text does not appear to be an interview" in result:
                         st.subheader("Transcription")
