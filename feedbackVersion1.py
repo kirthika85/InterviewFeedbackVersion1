@@ -135,15 +135,6 @@ else:
                 f.write(uploaded_audio.read())
 
             # Agent Task Description
-            task_description = f"""
-            I have uploaded an audio file. Your task is to:
-            1. Transcribe the audio.
-            2. Determine if the transcription is from an interview.
-            3. If it is an interview, generate feedback based on the job description: "{job_description}" and company name: "{company_name}".
-            4. If it is not an interview, display only the transcription.
-            """
-
-            # Pass the structured 'input' to agent.run()
             query = f"""
             Analyze the audio file uploaded.
             1. Transcribe the audio file located at '{audio_file_path}'.
@@ -154,7 +145,7 @@ else:
             """
 
             # Run agent with the 'input' key
-            result = agent.run(input_data)
+            result = agent.run(query)
             st.write("Agent Result:", result)
 
             # Display results in tabs
