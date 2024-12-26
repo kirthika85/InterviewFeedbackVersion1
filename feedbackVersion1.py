@@ -140,9 +140,12 @@ else:
                     file_content = uploaded_audio.read()  # Read the content of the uploaded file
                     temp_file.write(file_content)  # Write the content to the temporary file
                     audio_file_path = temp_file.name
+                    temp_file.close()
                     st.write(f"Debug: Temporary audio file path is {audio_file_path}")
                     st.write(f"Debug: Uploaded file size is {len(file_content)} bytes")
                     st.write(f"Debug: First 100 bytes of file content: {file_content[:100]}")
+                    st.write(f"Debug: File exists after writing and closing? {os.path.exists(audio_file_path)}")
+
 
                 query = f"""
                 Analyze the audio file uploaded. 
