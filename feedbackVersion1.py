@@ -135,9 +135,12 @@ else:
             try:
                 # Use a temporary directory to save the uploaded file
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
-                    temp_file.write(uploaded_audio.read())
+                    file_content = uploaded_audio.read()  # Read the content of the uploaded file
+                    temp_file.write(file_content)  # Write the content to the temporary file
                     audio_file_path = temp_file.name
                     st.write(f"Debug: Temporary audio file path is {audio_file_path}")
+                    st.write(f"Debug: Uploaded file size is {len(file_content)} bytes")
+                    st.write(f"Debug: First 100 bytes of file content: {file_content[:100]}")
 
                 query = f"""
                 Analyze the audio file uploaded. 
