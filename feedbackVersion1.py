@@ -129,73 +129,73 @@ else:
 
     # Start Analysis Section
     if st.button("Start Analysis"):
-        if not uploaded_audio:
+       if not uploaded_audio:
             st.warning("Please upload an audio file.")
-        else:
+       else:
             # Save uploaded audio file
             audio_file_path = "uploaded_audio.mp3"
             with open(audio_file_path, "wb") as f:
                 f.write(uploaded_audio.read())
 
-           # Concatenate the necessary inputs into a single input
-        input_data = f"""
-        I have uploaded an audio file. Your task is to:
-        1. Transcribe the audio file located at {audio_file_path}.
-        2. Determine if the transcription is from an interview.
-        3. If it is an interview, generate feedback based on the job description: "{job_description}" and company name: "{company_name}".
-        4. If it is not an interview, display only the transcription.
-        """
+            # Concatenate the necessary inputs into a single input
+            input_data = f"""
+            I have uploaded an audio file. Your task is to:
+            1. Transcribe the audio file located at {audio_file_path}.
+            2. Determine if the transcription is from an interview.
+            3. If it is an interview, generate feedback based on the job description: "{job_description}" and company name: "{company_name}".
+            4. If it is not an interview, display only the transcription.
+            """
 
-        # Run the agent with the single 'input' key
-        with st.spinner("Analyzing..."):
-            try:
-                result = agent.run({"input": input_data})  # Provide the input key here
+            # Run the agent with the single 'input' key
+            with st.spinner("Analyzing..."):
+                try:
+                    result = agent.run({"input": input_data})  # Provide the input key here
 
-                if "This text does not appear to be an interview" in result:
-                    st.subheader("Transcription")
-                    st.write(result)
-                    st.warning("The audio file does not appear to contain an interview.")
-                else:
-                    # Display results in tabs
-                    tab1, tab2 = st.tabs(["Feedback Analysis", "Score Analysis"])
-
-                    with tab1:
-                        st.subheader("Feedback Analysis")
+                    if "This text does not appear to be an interview" in result:
+                        st.subheader("Transcription")
                         st.write(result)
+                        st.warning("The audio file does not appear to contain an interview.")
+                    else:
+                        # Display results in tabs
+                        tab1, tab2 = st.tabs(["Feedback Analysis", "Score Analysis"])
 
-                        # Extract and display scores
-                        scores = {}
-                        score_pattern = re.compile(r"(\w+)\s*Score:\s*(\d+)\s*/\s*100")
-                        matches = score_pattern.findall(result)
+                        with tab1:
+                            st.subheader("Feedback Analysis")
+                            st.write(result)
 
-                        if matches:
-                            scores = {match[0]: int(match[1]) for match in matches}
-                            for criterion, score in scores.items():
-                                st.write(f"{criterion} Score: {score}/100")
+                            # Extract and display scores
+                            scores = {}
+                            score_pattern = re.compile(r"(\w+)\s*Score:\s*(\d+)\s*/\s*100")
+                            matches = score_pattern.findall(result)
 
-                    with tab2:
-                        st.subheader("Score Analysis")
+                            if matches:
+                                scores = {match[0]: int(match[1]) for match in matches}
+                                for criterion, score in scores.items():
+                                    st.write(f"{criterion} Score: {score}/100")
 
-                        if scores:
-                            # Ensure no score is zero before plotting
-                            if all(value > 0 for value in scores.values()):
-                                fig, ax = plt.subplots()
-                                ax.pie(
-                                    scores.values(),
-                                    labels=scores.keys(),
-                                    autopct='%1.1f%%',
-                                    startangle=90,
-                                    colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'],
-                                )
-                                ax.axis('equal')
-                                st.pyplot(fig)
+                        with tab2:
+                            st.subheader("Score Analysis")
+
+                            if scores:
+                                # Ensure no score is zero before plotting
+                                if all(value > 0 for value in scores.values()):
+                                    fig, ax = plt.subplots()
+                                    ax.pie(
+                                        scores.values(),
+                                        labels=scores.keys(),
+                                        autopct='%1.1f%%',
+                                        startangle=90,
+                                        colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'],
+                                    )
+                                    ax.axis('equal')
+                                    st.pyplot(fig)
+                                else:
+                                    st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
                             else:
-                                st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
-                        else:
-                            st.warning("No scores were detected in the feedback.")
+                                st.warning("No scores were detected in the feedback.")
 
-            except Exception as e:
-                st.error(f"Error in processing: {e}")
+                except Exception as e:
+                    st.error(f"Error in processing: {e}")
 
-        # Clean up
-        os.remove(audio_file_path)
+       # Clean up
+       os.remove(audio_file_path)
