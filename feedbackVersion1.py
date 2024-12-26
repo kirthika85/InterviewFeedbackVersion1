@@ -30,11 +30,11 @@ else:
     def transcribe_audio(file_path):
         try:
             with open(file_path, "rb") as audio:
-                response = openai.Audio.transcribe(
+                response = openai.audio.transcriptions.create(
                     model="whisper-1",
                     file=audio,
                 )
-            return response["text"]
+            return response.text
         except Exception as e:
             return f"Error in audio transcription: {e}"
 
@@ -48,12 +48,12 @@ else:
         {text}
         """
         try:
-            response = openai.ChatCompletion.create(
+            response = openai.chat.completions.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=10,
             )
-            return response.choices[0].message["content"].strip().lower() == "yes"
+            return response.choices[0].message.content.strip().lower() == "yes"
         except Exception as e:
             return False
 
@@ -80,12 +80,12 @@ else:
         - Areas of Improvement: [Explanation]
         """
         try:
-            response = openai.ChatCompletion.create(
+            response = openai.chat.completions.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=2000,
             )
-            return response.choices[0].message["content"]
+            return response.choices[0].message.content
         except Exception as e:
             return f"Error generating feedback: {e}"
 
