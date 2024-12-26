@@ -102,7 +102,7 @@ else:
         ),
         Tool(
             name="Generate Feedback",
-            func=lambda inputs: generate_feedback(*text.split('|')),
+            func=lambda text: generate_feedback(*text.split('|')),
             description="Generate feedback for interview transcription. Query must provide the interview text, job description, and company name, separated by '|'.",
         ),
     ]
@@ -140,7 +140,7 @@ else:
             1. Transcribe the audio file located at '{audio_file_path}'.
             2. Classify if the transcription is an interview.
             3. If it is an interview, provide feedback using the following information:
-            {transcription_result}|{job_description}|{company_name}
+            {transcription}|{job_description}|{company_name}
             4. If it is not an interview, only display the transcription.
             """
 
