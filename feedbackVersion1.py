@@ -1,9 +1,9 @@
+
 import streamlit as st
 import openai
 import os
-import tempfile
 import matplotlib.pyplot as plt
-from langchain.chat_models import ChatOpenAI
+from langchain.llms import OpenAI
 from langchain.agents import initialize_agent, Tool
 from langchain.chains.conversation.memory import ConversationBufferMemory
 import re
@@ -20,23 +20,21 @@ if not openai_api_key:
     st.warning("Please enter your OpenAI API key to proceed.")
 else:
     openai.api_key = openai_api_key
-    llm = ChatOpenAI(openai_api_key=openai_api_key, temperature=0.7, model="gpt-4")
+    # Initialize OpenAI Model
+    llm = OpenAI(openai_api_key=openai_api_key, temperature=0.7, model="gpt-4")
+
+    # Conversation Memory
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
     # Tool: Transcribe Audio
-    def transcribe_audio(audio_file_path):
+    def transcribe_audio(file_path):
         try:
-            st.write(f"Debug: File exists before transcription? {os.path.exists(audio_file_path)}")
-            if os.path.exists(audio_file_path):
-                with open(audio_file_path, "rb") as audio:
-                    response = openai.audio.transcriptions.create(
-                        model="whisper-1",
-                        file=audio,
-                    )
-                st.write("Debug: Transcription API Response:", response.text)
-                return response.text
-            else:
-                return f"Error: File not found at {audio_file_path}"
+            with open(file_path, "rb") as audio:
+                response = openai.Audio.transcribe(
+                    model="whisper-1",
+                    file=audio,
+                )
+            return response["text"]
         except Exception as e:
             return f"Error in audio transcription: {e}"
 
@@ -50,12 +48,12 @@ else:
         {text}
         """
         try:
-            response = openai.chat.completions.create(
+            response = openai.ChatCompletion.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=10,
             )
-            return response.choices[0].message.content.strip().lower() == "yes"
+            return response.choices[0].message["content"].strip().lower() == "yes"
         except Exception as e:
             return False
 
@@ -82,12 +80,12 @@ else:
         - Areas of Improvement: [Explanation]
         """
         try:
-            response = openai.chat.completions.create(
+            response = openai.ChatCompletion.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=2000,
             )
-            return response.choices[0].message.content
+            return response.choices[0].message["content"]
         except Exception as e:
             return f"Error generating feedback: {e}"
 
@@ -96,22 +94,19 @@ else:
         Tool(
             name="Transcribe Audio",
             func=lambda file_path: transcribe_audio(file_path),
-            description="Transcribe an audio file. Provide the file path in the query.",
+            description="Converts an audio file at the given file path into text transcription.",
         ),
         Tool(
             name="Classify Text",
             func=lambda text: is_interview(text),
-            description="Classify text to determine if it represents an interview. Include the text in the query.",
+            description="Determines if the transcribed text represents an interview conversation.",
         ),
         Tool(
             name="Generate Feedback",
             func=lambda inputs: generate_feedback(
                 inputs["interview_text"], inputs["job_description"], inputs["company_name"]
             ),
-            description=(
-                "Generate feedback for interview transcription. Query must provide the interview text, "
-                "job description, and company name."
-            ),
+            description="Analyzes interview transcription and provides detailed feedback based on the job description and company name.",
         ),
     ]
 
@@ -132,78 +127,75 @@ else:
     with st.expander("Upload Interview Recording", expanded=True):
         uploaded_audio = st.file_uploader("Upload your audio file (mp3, wav, etc.)", type=["mp3", "wav", "ogg"])
 
-# Start Analysis Section
+    # Start Analysis Section
     if st.button("Start Analysis"):
         if not uploaded_audio:
             st.warning("Please upload an audio file.")
         else:
-            try:
-                # Use a temporary directory to save the uploaded file
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
-                    file_content = uploaded_audio.read()  # Read the content of the uploaded file
-                    temp_file.write(file_content)  # Write the content to the temporary file
-                    audio_file_path = temp_file.name
-                    temp_file.close()
-                    st.write(f"Debug: Temporary audio file path is {audio_file_path}")
-                    st.write(f"Debug: Uploaded file size is {len(file_content)} bytes")
-                    st.write(f"Debug: First 100 bytes of file content: {file_content[:100]}")
-                    st.write(f"Debug: File exists after writing and closing? {os.path.exists(audio_file_path)}")
-                    transcription_result = transcribe_audio(audio_file_path)
-                    st.write("Transcription Result:", transcription_result)
+            # Save uploaded audio file
+            audio_file_path = "uploaded_audio.mp3"
+            with open(audio_file_path, "wb") as f:
+                f.write(uploaded_audio.read())
 
+            # Agent Task Description
+            task_description = f"""
+            I have uploaded an audio file. Your task is to:
+            1. Transcribe the audio.
+            2. Determine if the transcription is from an interview.
+            3. If it is an interview, generate feedback based on the job description: "{job_description}" and company name: "{company_name}".
+            4. If it is not an interview, display only the transcription.
+            """
 
-                query = f"""
-                Analyze the audio file uploaded. 
-                1. Transcribe the audio file located at '{audio_file_path}'.
-                2. Classify if the transcription is an interview.
-                3. If it is an interview, provide feedback using the job description: "{job_description}" and company name: "{company_name}".
-                4. If it is not an interview, only display the transcription.
-                """
-                with st.spinner("Analyzing..."):
-                    result = agent.run(query)
+            # Let the agent decide which tools to use
+            with st.spinner("Analyzing..."):
+                try:
+                    result = agent.run({"file_path": audio_file_path, "job_description": job_description, "company_name": company_name, "task_description": task_description})
 
-                if "This text does not appear to be an interview" in result:
-                    st.subheader("Transcription")
-                    st.write(result)
-                    st.warning("The audio file does not appear to contain an interview.")
-                else:
-                    # Separate tabs for feedback and scores
-                    tab1, tab2 = st.tabs(["Feedback Analysis", "Score Analysis"])
+                    if "This text does not appear to be an interview" in result:
+                        st.subheader("Transcription")
+                        st.write(transcription)
+                        st.warning("The audio file does not appear to contain an interview.")
+                    else:
+                        # Display results in tabs
+                        tab1, tab2 = st.tabs(["Feedback Analysis", "Score Analysis"])
 
-                    with tab1:
-                        st.subheader("Feedback Analysis")
-                        st.write(result)
+                        with tab1:
+                            st.subheader("Feedback Analysis")
+                            st.write(result)
 
-                    with tab2:
-                        st.subheader("Score Analysis")
+                            # Extract and display scores
+                            scores = {}
+                            score_pattern = re.compile(r"(\w+)\s*Score:\s*(\d+)\s*/\s*100")
+                            matches = score_pattern.findall(result)
 
-                        # Extract Scores from the result
-                        scores = {}
-                        score_pattern = re.compile(r"(\w+)\s*Score:\s*(\d+)\s*/\s*100")
-                        matches = score_pattern.findall(result)
+                            if matches:
+                                scores = {match[0]: int(match[1]) for match in matches}
+                                for criterion, score in scores.items():
+                                    st.write(f"{criterion} Score: {score}/100")
 
-                        if matches:
-                            scores = {match[0]: int(match[1]) for match in matches}
-                            st.write("### Score Breakdown")
-                            for criterion, score in scores.items():
-                                st.write(f"{criterion} Score: {score}/100")
+                        with tab2:
+                            st.subheader("Score Analysis")
 
-                            # Plot Pie Chart
-                            fig, ax = plt.subplots()
-                            ax.pie(
-                                scores.values(),
-                                labels=scores.keys(),
-                                autopct='%1.1f%%',
-                                startangle=90,
-                                colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'],
-                            )
-                            ax.axis('equal')
-                            st.pyplot(fig)
-                        else:
-                            st.warning("No scores detected in the feedback.")
-            except Exception as e:
-                st.error(f"Error in processing: {e}")
-            finally:
-                # Clean up the temporary file
-                if os.path.exists(audio_file_path):
-                    os.remove(audio_file_path)
+                            if scores:
+                                # Ensure no score is zero before plotting
+                                if all(value > 0 for value in scores.values()):
+                                    fig, ax = plt.subplots()
+                                    ax.pie(
+                                        scores.values(),
+                                        labels=scores.keys(),
+                                        autopct='%1.1f%%',
+                                        startangle=90,
+                                        colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'],
+                                    )
+                                    ax.axis('equal')
+                                    st.pyplot(fig)
+                                else:
+                                    st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
+                            else:
+                                st.warning("No scores were detected in the feedback.")
+
+                except Exception as e:
+                    st.error(f"Error in processing: {e}")
+
+            # Clean up
+            os.remove(audio_file_path)
