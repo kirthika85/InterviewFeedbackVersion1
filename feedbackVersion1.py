@@ -58,35 +58,35 @@ else:
 
     # Tool: Generate Feedback
     def generate_feedback(interview_text, job_description, company_name):
-        prompt = f"""
-        You are an expert interviewer and career coach. Analyze the candidate's interview performance for the position at {company_name}.
-        The interview text provided is as follows:
+    prompt = f"""
+    You are an expert interviewer and career coach. Analyze the candidate's interview performance for the position at {company_name}.
+    The interview text provided is as follows:
 
-        {interview_text}
+    {interview_text}
 
-        Evaluate the following criteria on a scale of 0 to 100:
-        1. Alignment with job description ({job_description})
-        2. Clarity of communication and confidence.
-        3. Strength of their responses to key questions.
-        4. Areas of improvement with actionable advice.
-        5. Overall assessment and a final score out of 100.
+    Evaluate the following criteria on a scale of 0 to 100:
+    1. Alignment with job description ({job_description})
+    2. Clarity of communication and confidence.
+    3. Strength of their responses to key questions.
+    4. Areas of improvement with actionable advice.
+    5. Overall assessment and a final score out of 100.
 
-        Format the output as:
-        - Alignment Score: [Score/100]
-        - Clarity Score: [Score/100]
-        - Strength Score: [Score/100]
-        - Overall Score: [Score/100]
-        - Areas of Improvement: [Explanation]
-        """
-        try:
-            response = openai.chat.completions.create(
-                model="gpt-4",
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=2000,
-            )
-            return response.choices[0].message["content"]
-        except Exception as e:
-            return f"Error generating feedback: {e}"
+    Format the output as:
+    - Alignment Score: [Score/100]
+    - Clarity Score: [Score/100]
+    - Strength Score: [Score/100]
+    - Overall Score: [Score/100]
+    - Areas of Improvement: [Explanation]
+    """
+    try:
+        response = openai.chat.completions.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=2000,
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        return f"Error generating feedback: {e}"
 
     # Tools for the Agent
     tools = [
