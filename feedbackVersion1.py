@@ -102,10 +102,8 @@ else:
         ),
         Tool(
             name="Generate Feedback",
-            func=lambda inputs: generate_feedback(
-                inputs["interview_text"], inputs["job_description"], inputs["company_name"]
-            ),
-            description="Analyzes interview transcription and provides detailed feedback based on the job description and company name.",
+            func=lambda inputs: generate_feedback(*text.split('|')),
+            description="Generate feedback for interview transcription. Query must provide the interview text, job description, and company name, separated by '|'.",
         ),
     ]
 
@@ -146,13 +144,18 @@ else:
             """
 
             # Pass the structured 'input' to agent.run()
-            input_data = f"""
-            Please analyze the following task:
-            {task_description}
+            query = f"""
+            Analyze the audio file uploaded.
+            1. Transcribe the audio file located at '{audio_file_path}'.
+            2. Classify if the transcription is an interview.
+            3. If it is an interview, provide feedback using the following information:
+            {transcription_result}|{job_description}|{company_name}
+            4. If it is not an interview, only display the transcription.
             """
 
             # Run agent with the 'input' key
-            result = agent.run({"input": input_data})
+            result = agent.run(input_data)
+            st.write("Agent Result:", result)
 
             # Display results in tabs
             tab1, tab2 = st.tabs(["Feedback Analysis", "Score Analysis"])
