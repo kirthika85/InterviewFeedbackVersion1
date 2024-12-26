@@ -128,33 +128,28 @@ else:
 
     # Start Analysis Section
     if st.button("Start Analysis"):
-       if not uploaded_audio:
+        if not uploaded_audio:
             st.warning("Please upload an audio file.")
-       else:
+        else:
             # Save uploaded audio file
             audio_file_path = "uploaded_audio.mp3"
             with open(audio_file_path, "wb") as f:
                 f.write(uploaded_audio.read())
 
-             # Concatenate the necessary inputs into a single input string
-        input_data = f"""
-        I have uploaded an audio file. Your task is to:
-        1. Transcribe the audio file located at {audio_file_path}.
-        2. Determine if the transcription is from an interview.
-        3. If it is an interview, generate feedback based on the job description: "{job_description}" and company name: "{company_name}".
-        4. If it is not an interview, display only the transcription.
-        """
+            # Agent Task Description
+            task_description = f"""
+            I have uploaded an audio file. Your task is to:
+            1. Transcribe the audio.
+            2. Determine if the transcription is from an interview.
+            3. If it is an interview, generate feedback based on the job description: "{job_description}" and company name: "{company_name}".
+            4. If it is not an interview, display only the transcription.
+            """
 
-        # Run the agent with the structured input under the 'input' key
-        with st.spinner("Analyzing..."):
-            try:
-                result = agent.run({"input": input_data})  # Provide the 'input' key here
+            # Let the agent decide which tools to use
+            with st.spinner("Analyzing..."):
+                try:
+                    result = agent.run({"file_path": audio_file_path, "job_description": job_description, "company_name": company_name, "task_description": task_description})
 
-                if "This text does not appear to be an interview" in result:
-                    st.subheader("Transcription")
-                    st.write(result)
-                    st.warning("The audio file does not appear to contain an interview.")
-                else:
                     # Display results in tabs
                     tab1, tab2 = st.tabs(["Feedback Analysis", "Score Analysis"])
 
@@ -193,8 +188,8 @@ else:
                         else:
                             st.warning("No scores were detected in the feedback.")
 
-            except Exception as e:
-                st.error(f"Error in processing: {e}")
+                except Exception as e:
+                    st.error(f"Error in processing: {e}")
 
-        # Clean up
-        os.remove(audio_file_path)
+            # Clean up
+            os.remove(audio_file_path)
