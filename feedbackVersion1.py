@@ -148,7 +148,7 @@ else:
         # Run the agent with the structured input under the 'input' key
         with st.spinner("Analyzing..."):
             try:
-                result = agent.run({"input": input_data})  # Provide the 'input' key here
+                result = agent.run(input_data)  # Provide the 'input' key here
 
                 if "This text does not appear to be an interview" in result:
                     st.subheader("Transcription")
