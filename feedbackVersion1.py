@@ -136,63 +136,65 @@ else:
             with open(audio_file_path, "wb") as f:
                 f.write(uploaded_audio.read())
 
-            # Concatenate the necessary inputs into a single input
-            inputs = {
-            "file_path": audio_file_path,
-            "job_description": job_description,
-            "company_name": company_name,
-            "task_description": "I have uploaded an audio file. Your task is to transcribe the audio and determine if it is an interview."
-            }
-            #Run the agent with structured inputs
-            with st.spinner("Analyzing..."):
-                try:
-                    result = agent.run(inputs)  # Provide the input structure here
+             # Concatenate the necessary inputs into a single input string
+        input_data = f"""
+        I have uploaded an audio file. Your task is to:
+        1. Transcribe the audio file located at {audio_file_path}.
+        2. Determine if the transcription is from an interview.
+        3. If it is an interview, generate feedback based on the job description: "{job_description}" and company name: "{company_name}".
+        4. If it is not an interview, display only the transcription.
+        """
 
-                    if "This text does not appear to be an interview" in result:
-                        st.subheader("Transcription")
+        # Run the agent with the structured input under the 'input' key
+        with st.spinner("Analyzing..."):
+            try:
+                result = agent.run({"input": input_data})  # Provide the 'input' key here
+
+                if "This text does not appear to be an interview" in result:
+                    st.subheader("Transcription")
+                    st.write(result)
+                    st.warning("The audio file does not appear to contain an interview.")
+                else:
+                    # Display results in tabs
+                    tab1, tab2 = st.tabs(["Feedback Analysis", "Score Analysis"])
+
+                    with tab1:
+                        st.subheader("Feedback Analysis")
                         st.write(result)
-                        st.warning("The audio file does not appear to contain an interview.")
-                    else:
-                        # Display results in tabs
-                        tab1, tab2 = st.tabs(["Feedback Analysis", "Score Analysis"])
 
-                        with tab1:
-                            st.subheader("Feedback Analysis")
-                            st.write(result)
+                        # Extract and display scores
+                        scores = {}
+                        score_pattern = re.compile(r"(\w+)\s*Score:\s*(\d+)\s*/\s*100")
+                        matches = score_pattern.findall(result)
 
-                            # Extract and display scores
-                            scores = {}
-                            score_pattern = re.compile(r"(\w+)\s*Score:\s*(\d+)\s*/\s*100")
-                            matches = score_pattern.findall(result)
+                        if matches:
+                            scores = {match[0]: int(match[1]) for match in matches}
+                            for criterion, score in scores.items():
+                                st.write(f"{criterion} Score: {score}/100")
 
-                            if matches:
-                                scores = {match[0]: int(match[1]) for match in matches}
-                                for criterion, score in scores.items():
-                                    st.write(f"{criterion} Score: {score}/100")
+                    with tab2:
+                        st.subheader("Score Analysis")
 
-                        with tab2:
-                            st.subheader("Score Analysis")
-
-                            if scores:
-                                # Ensure no score is zero before plotting
-                                if all(value > 0 for value in scores.values()):
-                                    fig, ax = plt.subplots()
-                                    ax.pie(
-                                        scores.values(),
-                                        labels=scores.keys(),
-                                        autopct='%1.1f%%',
-                                        startangle=90,
-                                        colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'],
-                                    )
-                                    ax.axis('equal')
-                                    st.pyplot(fig)
-                                else:
-                                    st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
+                        if scores:
+                            # Ensure no score is zero before plotting
+                            if all(value > 0 for value in scores.values()):
+                                fig, ax = plt.subplots()
+                                ax.pie(
+                                    scores.values(),
+                                    labels=scores.keys(),
+                                    autopct='%1.1f%%',
+                                    startangle=90,
+                                    colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'],
+                                )
+                                ax.axis('equal')
+                                st.pyplot(fig)
                             else:
-                                st.warning("No scores were detected in the feedback.")
+                                st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
+                        else:
+                            st.warning("No scores were detected in the feedback.")
 
-                except Exception as e:
-                    st.error(f"Error in processing: {e}")
+            except Exception as e:
+                st.error(f"Error in processing: {e}")
 
-       # Clean up
-       os.remove(audio_file_path)
+        # Clean up
+        os.remove(audio_file_path)
