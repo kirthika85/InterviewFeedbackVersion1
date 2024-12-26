@@ -135,10 +135,9 @@ else:
         if not uploaded_audio:
             st.warning("Please upload an audio file.")
         else:
-            # Use a temporary directory to save the uploaded file
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
-                temp_file.write(uploaded_audio.read())
-                audio_file_path = temp_file.name  # Get the full path of the saved file
+            audio_file_path = "uploaded_audio.mp3"
+            with open(audio_file_path, "wb") as f:
+                f.write(uploaded_audio.read())
 
             # Verify the file exists
             if os.path.exists(audio_file_path):
