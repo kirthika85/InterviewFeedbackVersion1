@@ -1,6 +1,5 @@
 streamlit
-openai>=1.11.1,<2.0.0
-#openai
+openai
 langchain
 langchain_community
 langchain_openai
