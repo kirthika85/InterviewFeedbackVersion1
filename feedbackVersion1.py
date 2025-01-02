@@ -3,6 +3,7 @@ import openai
 import os
 import matplotlib.pyplot as plt
 from langchain_openai import OpenAI
+from langchain.chat_models import ChatOpenAI
 from langchain.agents import initialize_agent, Tool
 from langchain.chains.conversation.memory import ConversationBufferMemory
 import re
@@ -20,7 +21,7 @@ if not openai_api_key:
 else:
     openai.api_key = openai_api_key
     # Initialize OpenAI Model
-    llm = OpenAI(openai_api_key=openai_api_key, temperature=0.7, model="gpt-4")
+    llm = ChatOpenAI(openai_api_key=openai_api_key, temperature=0.7, model="gpt-4")
 
     # Conversation Memory
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
