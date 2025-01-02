@@ -89,26 +89,26 @@ else:
             return f"Error generating feedback: {e}"
 
     # Tools for the Agent
-   tools = [
-    Tool(
-        name="Transcribe Audio",
-        func=transcribe_audio,
-        description="Converts an audio file at the given file path into text transcription.",
-    ),
-    Tool(
-        name="Classify Text",
-        func=is_interview,
-        description="Determines if the transcribed text represents an interview conversation.",
-    ),
-    Tool(
-        name="Generate Feedback",
-        func=lambda text: generate_feedback(*text.split('|')),  # Keep lambda for parsing input
-        description=(
-            "Generate feedback for interview transcription. "
-            "Input must be a string with the format: 'interview_text|job_description|company_name'."
+     tools = [
+        Tool(
+            name="Transcribe Audio",
+            func=transcribe_audio,
+            description="Converts an audio file at the given file path into text transcription.",
         ),
-    ),
-]
+        Tool(
+            name="Classify Text",
+            func=is_interview,
+            description="Determines if the transcribed text represents an interview conversation.",
+        ),
+        Tool(
+            name="Generate Feedback",
+            func=lambda text: generate_feedback(*text.split('|')),  # Keep lambda for parsing input
+            description=(
+                "Generate feedback for interview transcription. "
+                "Input must be a string with the format: 'interview_text|job_description|company_name'."
+            ),
+        ),
+    ]
 
 
     # Initialize the Agent
