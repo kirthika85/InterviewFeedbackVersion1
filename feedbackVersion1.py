@@ -140,12 +140,13 @@ else:
 
             # Agent Task Description
             query = f"""
-            Analyze the audio file uploaded.
-            1. Transcribe the audio file located at '{audio_file_path}'.
-            2. Classify if the transcription is an interview.
-            3. If it is an interview, provide feedback using the following information:
-            {transcription}|{job_description}|{company_name}
-            4. If it is not an interview, only display the transcription.
+            Analyze the uploaded audio file '{audio_file_path}' for interview feedback:
+            1. Transcribe the audio file.
+            2. Determine if the transcription represents an interview conversation.
+            3. If it is an interview, generate detailed feedback based on the job description:
+               - Job Description: {job_description}
+               - Company Name: {company_name}
+            4. Provide feedback and scores, or indicate if it is not an interview.
             """
 
             # Run agent with the 'input' key
