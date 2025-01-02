@@ -1,6 +1,7 @@
 import streamlit as st
 import openai
 import os
+import tempfile
 import matplotlib.pyplot as plt
 from langchain_openai import OpenAI
 from langchain.chat_models import ChatOpenAI
@@ -26,15 +27,14 @@ else:
     # Conversation Memory
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-    # Tool: Transcribe Audio
-    def transcribe_audio(file_path):
+    # Tool: Transcribe Audio (Updated to accept file content)
+    def transcribe_audio(file_content):
         try:
-            with open(file_path, "rb") as audio:
-                response = openai.audio.transcriptions.create(
-                    model="whisper-1",
-                    file=audio,
-                )
-            return response.text
+            response = openai.audio.transcriptions.create(
+                model="whisper-1",
+                file=file_content,
+            )
+            return response["text"]
         except Exception as e:
             return f"Error in audio transcription: {e}"
 
@@ -94,7 +94,7 @@ else:
         Tool(
             name="Transcribe Audio",
             func=transcribe_audio,
-            description="Converts an audio file at the given file path into text transcription.",
+            description="Converts an audio file into text transcription.",
         ),
         Tool(
             name="Classify Text",
@@ -110,7 +110,6 @@ else:
             ),
         ),
     ]
-
 
     # Initialize the Agent
     agent = initialize_agent(
@@ -134,14 +133,18 @@ else:
         if not uploaded_audio:
             st.warning("Please upload an audio file.")
         else:
-            # Save uploaded audio file
-            audio_file_path = "uploaded_audio.mp3"
-            with open(audio_file_path, "wb") as f:
-                f.write(uploaded_audio.read())
+            # Use a temporary file for uploaded audio
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio:
+                temp_audio.write(uploaded_audio.read())
+                temp_audio_path = temp_audio.name
 
-            # Agent Task Description
+            # Pass temp file content to the agent
+            with open(temp_audio_path, "rb") as f:
+                audio_content = f.read()
+
+            # Agent Task Description (updated to include file content)
             query = f"""
-            Analyze the uploaded audio file '{audio_file_path}' for interview feedback:
+            Analyze the uploaded audio file for interview feedback:
             1. Transcribe the audio file.
             2. Determine if the transcription represents an interview conversation.
             3. If it is an interview, generate detailed feedback based on the job description:
@@ -150,8 +153,11 @@ else:
             4. Provide feedback and scores, or indicate if it is not an interview.
             """
 
-            # Run agent with the 'input' key
-            result = agent.run(query)
+            result = agent.run({
+                "input": query,
+                "tools_input": audio_content,  # Pass the content of the audio file
+            })
+
             st.write("Agent Result:", result)
 
             # Display results in tabs
@@ -192,5 +198,5 @@ else:
                 else:
                     st.warning("No scores were detected in the feedback.")
 
-            # Clean up
-            os.remove(audio_file_path)
+            # Clean up the temporary file
+            os.remove(temp_audio_path)
