@@ -2,6 +2,7 @@ import streamlit as st
 import openai
 import os
 import tempfile
+import shutil
 import matplotlib.pyplot as plt
 from langchain_openai import OpenAI
 from langchain.chat_models import ChatOpenAI
@@ -35,7 +36,7 @@ else:
                     model="whisper-1",
                     file=audio_file,
                 )
-            return response["text"]
+            return response.text
         except Exception as e:
             return f"Error in audio transcription: {e}"
 
@@ -134,15 +135,19 @@ else:
         if not uploaded_audio:
             st.warning("Please upload an audio file.")
         else:
-            # Save the uploaded audio to a temporary file
+            # Save the uploaded audio to a temporary file and move it to a persistent location
             with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio_file:
                 temp_audio_file.write(uploaded_audio.read())
                 temp_audio_file_path = temp_audio_file.name
 
+            # Move the file to a known location (e.g., temp directory)
+            persistent_audio_path = os.path.join("/tmp", os.path.basename(temp_audio_file_path))
+            shutil.move(temp_audio_file_path, persistent_audio_path)
+
             # Define the query for the agent
             query = f"""
             Analyze the uploaded audio file for interview feedback:
-            1. Transcribe the audio file located at '{temp_audio_file_path}'.
+            1. Transcribe the audio file located at '{persistent_audio_path}'.
             2. Determine if the transcription represents an interview conversation.
             3. If it is an interview, generate detailed feedback based on the job description:
                - Job Description: {job_description}
@@ -194,5 +199,5 @@ else:
                 else:
                     st.warning("No scores were detected in the feedback.")
 
-            # Clean up the temporary audio file
-            os.remove(temp_audio_file_path)
+            # Clean up the persistent audio file
+            os.remove(persistent_audio_path)
