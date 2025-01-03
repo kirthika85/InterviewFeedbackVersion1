@@ -135,9 +135,9 @@ else:
             st.write("Audio file uploaded successfully.")
 
             # Define the query for the agent
-            query = f"""
+            input_data = f"""
             Analyze the uploaded audio file for interview feedback:
-            1. Transcribe the provided audio file.
+            1. Transcribe the provided audio file (File: {uploaded_audio.name}).
             2. Determine if the transcription represents an interview conversation.
             3. If it is an interview, generate detailed feedback based on the job description:
                - Job Description: {job_description}
@@ -146,11 +146,7 @@ else:
             """
 
             # Run the agent with the uploaded file object
-            result = agent.run(input={
-                "file": uploaded_audio, 
-                "job_description": job_description, 
-                "company_name": company_name
-            })
+            result = agent.run(input=input_data)
 
             # Display the agent result
             st.write("Agent Result:", result)
