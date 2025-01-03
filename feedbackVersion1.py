@@ -151,7 +151,7 @@ else:
             # Verify if the file exists immediately after saving
             if not os.path.exists(persistent_audio_path):
                 st.warning(f"Error: The file was not saved correctly at {persistent_audio_path}.")
-                return
+                return false
 
             # Check if the file is accessible
             st.write(f"Saved audio file path: {persistent_audio_path}")
