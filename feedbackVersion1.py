@@ -27,7 +27,7 @@ else:
     # Conversation Memory
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-    # Tool: Transcribe Audio (Updated to accept file content)
+    # Tool: Transcribe Audio (Updated to accept byte stream)
     def transcribe_audio(file_content):
         try:
             response = openai.audio.transcriptions.create(
@@ -133,14 +133,8 @@ else:
         if not uploaded_audio:
             st.warning("Please upload an audio file.")
         else:
-            # Use a temporary file for uploaded audio
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio:
-                temp_audio.write(uploaded_audio.read())
-                temp_audio_path = temp_audio.name
-
-            # Open the temporary file and get its content
-            with open(temp_audio_path, "rb") as f:
-                audio_content = f.read()
+            # Read the audio file as byte stream (not as a file path)
+            audio_content = uploaded_audio.read()
 
             # Combine query and tools_input into a single message
             query = f"""
@@ -153,7 +147,7 @@ else:
             4. Provide feedback and scores, or indicate if it is not an interview.
             """
 
-            # Pass the audio content directly through the tool (transcribe_audio)
+            # Run the agent, the 'Transcribe Audio' tool should handle the audio file
             result = agent.run(query)  # No need to pass 'tools_input', agent will handle that internally
 
             st.write("Agent Result:", result)
@@ -196,5 +190,3 @@ else:
                 else:
                     st.warning("No scores were detected in the feedback.")
 
-            # Clean up the temporary file
-            os.remove(temp_audio_path)
