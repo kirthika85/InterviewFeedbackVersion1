@@ -35,15 +35,16 @@ else:
             # Check the type of the uploaded file object
             st.write(f"Uploaded file type: {type(file_object)}")
 
-            # The file object is an instance of `UploadedFile`, we need to convert it into bytes first
-            file_bytes = file_object.getvalue()  # Get the raw bytes of the uploaded file
-
-            # Debugging: Preview the first 100 bytes of the uploaded file (to check its content)
-            st.write(f"File content preview: {file_bytes[:100]}")  # Preview the first 100 bytes
-
-            # Convert the file bytes to a BytesIO object to work with OpenAI's API
+            if isinstance(file_object, io.BytesIO):
+                file_bytes = file_object.getvalue()
+            else:
+                file_bytes = file_object.read()
+        
+            # Convert to BytesIO for OpenAI API
             file_io = io.BytesIO(file_bytes)
-
+            file_io.name = "audio.mp3"  # Set a name for the file
+        
+            
             # Pass the file directly to OpenAI's transcription API
             response = openai.audio.transcriptions.create(
                 model="whisper-1",
@@ -120,8 +121,8 @@ else:
     tools = [
         Tool(
             name="Transcribe Audio",
-            func=transcribe_audio,
-            description="Converts an audio file into text transcription. Accepts a file object.",
+            func=lambda x: transcribe_audio(uploaded_audio),
+            description="Converts an audio file into text transcription. Uses the uploaded audio file.",
         ),
         Tool(
             name="Classify Text",
@@ -152,8 +153,14 @@ else:
         job_description = st.text_area("Enter the Job Description", height=200)
         company_name = st.text_input("Enter the Company Name")
 
+    if 'uploaded_audio' not in st.session_state:
+        st.session_state.uploaded_audio = None
+
+
     with st.expander("Upload Interview Recording", expanded=True):
         uploaded_audio = st.file_uploader("Upload your audio file (mp3, wav, etc.)", type=["mp3", "wav", "ogg"])
+        if uploaded_audio:
+            st.session_state.uploaded_audio = uploaded_audio
 
     # Start Analysis Section
     if st.button("Start Analysis"):
