@@ -34,7 +34,7 @@ else:
                 model="whisper-1",
                 file=file_content,
             )
-            return response["text"]
+            return response.text
         except Exception as e:
             return f"Error in audio transcription: {e}"
 
@@ -138,11 +138,11 @@ else:
                 temp_audio.write(uploaded_audio.read())
                 temp_audio_path = temp_audio.name
 
-            # Pass temp file content to the agent
+            # Open the temporary file and get its content
             with open(temp_audio_path, "rb") as f:
                 audio_content = f.read()
 
-            # Agent Task Description (updated to include file content)
+            # Combine query and tools_input into a single message
             query = f"""
             Analyze the uploaded audio file for interview feedback:
             1. Transcribe the audio file.
@@ -153,10 +153,8 @@ else:
             4. Provide feedback and scores, or indicate if it is not an interview.
             """
 
-            result = agent.run({
-                "input": query,
-                "tools_input": audio_content,  # Pass the content of the audio file
-            })
+            # Pass the audio content directly through the tool (transcribe_audio)
+            result = agent.run(query)  # No need to pass 'tools_input', agent will handle that internally
 
             st.write("Agent Result:", result)
 
