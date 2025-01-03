@@ -145,13 +145,13 @@ else:
                 temp_audio_file.write(uploaded_audio.read())
                 temp_audio_file_path = temp_audio_file.name
 
-            # Ensure the file is available by checking the path
+            # Log the temporary audio file path
             st.write(f"Saved temporary audio file path: {temp_audio_file_path}")
 
             # Ensure the file is correctly written and available
             if not os.path.exists(temp_audio_file_path):
                 st.warning(f"Error: The temporary file {temp_audio_file_path} could not be accessed.")
-                st.stop()  # Stop the execution without using 'return'
+                st.stop()  # Stop further execution
 
             # Add a delay before continuing (to ensure the file is fully written)
             time.sleep(1)
@@ -165,13 +165,18 @@ else:
             else:
                 persistent_audio_path = temp_audio_file_path  # Use the temp file path directly
 
-            # Ensure file exists before proceeding
+            # Validate if the file exists before proceeding
             if not os.path.exists(persistent_audio_path):
                 st.warning(f"Error: The file was not saved correctly at {persistent_audio_path}.")
-                st.stop()  # Stop the execution without using 'return'
+                st.stop()  # Stop further execution
 
             # Log the path for debugging
             st.write(f"Audio file path being passed to agent: {persistent_audio_path}")
+
+            # Check if file exists right before sending to agent
+            if not os.path.exists(persistent_audio_path):
+                st.warning(f"Error: The audio file at '{persistent_audio_path}' does not exist at the time of analysis.")
+                st.stop()  # Stop further execution
 
             # Define the query for the agent
             query = f"""
