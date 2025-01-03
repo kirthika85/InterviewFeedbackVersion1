@@ -168,7 +168,7 @@ else:
             # Ensure file exists before proceeding
             if not os.path.exists(persistent_audio_path):
                 st.warning(f"Error: The file was not saved correctly at {persistent_audio_path}.")
-                return
+                return False
 
             # Log the path for debugging
             st.write(f"Audio file path being passed to agent: {persistent_audio_path}")
