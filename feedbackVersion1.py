@@ -27,14 +27,15 @@ else:
     # Conversation Memory
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-    # Tool: Transcribe Audio (Updated to accept byte stream)
-    def transcribe_audio(file_content):
+    # Tool: Transcribe Audio (Updated to handle byte stream properly)
+    def transcribe_audio(file_path):
         try:
-            response = openai.audio.transcriptions.create(
-                model="whisper-1",
-                file=file_content,
-            )
-            return response["text"]
+            with open(file_path, "rb") as audio_file:
+                response = openai.audio.transcriptions.create(
+                    model="whisper-1",
+                    file=audio_file,
+                )
+            return response.text
         except Exception as e:
             return f"Error in audio transcription: {e}"
 
@@ -133,13 +134,15 @@ else:
         if not uploaded_audio:
             st.warning("Please upload an audio file.")
         else:
-            # Read the audio file as byte stream
-            audio_content = uploaded_audio.read()
+            # Save the uploaded audio to a temporary file
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio_file:
+                temp_audio_file.write(uploaded_audio.read())
+                temp_audio_file_path = temp_audio_file.name
 
             # Define the query for the agent
             query = f"""
             Analyze the uploaded audio file for interview feedback:
-            1. Transcribe the audio file.
+            1. Transcribe the audio file located at '{temp_audio_file_path}'.
             2. Determine if the transcription represents an interview conversation.
             3. If it is an interview, generate detailed feedback based on the job description:
                - Job Description: {job_description}
@@ -147,7 +150,7 @@ else:
             4. Provide feedback and scores, or indicate if it is not an interview.
             """
 
-            # Run agent with the single 'input' key
+            # Run agent with the 'input' key
             result = agent.run(input=query)
 
             # Display agent result
@@ -190,3 +193,6 @@ else:
                         st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
                 else:
                     st.warning("No scores were detected in the feedback.")
+
+            # Clean up the temporary audio file
+            os.remove(temp_audio_file_path)
