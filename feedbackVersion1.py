@@ -31,12 +31,16 @@ else:
     # Tool: Transcribe Audio (Updated to handle byte stream properly)
     def transcribe_audio(file_path):
         try:
+            # Check if the file exists at the given path
+            if not os.path.exists(file_path):
+                return f"Error: The audio file at {file_path} does not exist."
+
             with open(file_path, "rb") as audio_file:
                 response = openai.audio.transcriptions.create(
                     model="whisper-1",
                     file=audio_file,
                 )
-            return response.text
+            return response["text"]
         except Exception as e:
             return f"Error in audio transcription: {e}"
 
@@ -143,6 +147,9 @@ else:
             # Move the file to a known location (e.g., temp directory)
             persistent_audio_path = os.path.join("/tmp", os.path.basename(temp_audio_file_path))
             shutil.move(temp_audio_file_path, persistent_audio_path)
+
+            # Check if the file is saved properly
+            st.write(f"Saved audio file path: {persistent_audio_path}")
 
             # Define the query for the agent
             query = f"""
