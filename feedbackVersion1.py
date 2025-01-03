@@ -27,26 +27,32 @@ else:
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
     # Tool: Transcribe Audio
+    import openai
+import streamlit as st
+import io
+
+    # Tool: Transcribe Audio
     def transcribe_audio(file_object):
         try:
+            # Ensure the file object passed is in the correct format (BytesIO)
             st.write("Attempting to transcribe the audio...")
 
-            # Debugging: Check the type of the uploaded file object
+            # Check the type of the uploaded file object
             st.write(f"Uploaded file type: {type(file_object)}")
-        
+
+            # The file object is an instance of `UploadedFile`, we need to convert it into bytes first
+            file_bytes = file_object.getvalue()  # Get the raw bytes of the uploaded file
+
             # Debugging: Preview the first 100 bytes of the uploaded file (to check its content)
-            st.write(f"File content preview: {file_object.getvalue()[:100]}")  # Preview the first 100 bytes
+            st.write(f"File content preview: {file_bytes[:100]}")  # Preview the first 100 bytes
 
-            # Ensure the file_object is in the correct format (i.e., BytesIO)
-            if isinstance(file_object, io.BytesIO):
-                st.write("The file is in the correct format (BytesIO). Proceeding with transcription.")
-            else:
-                st.write(f"Error: The uploaded file is of type {type(file_object)}. Expected BytesIO.")
+            # Convert the file bytes to a BytesIO object to work with OpenAI's API
+            file_io = io.BytesIO(file_bytes)
 
-            # Pass the file directly to OpenAI's API
+            # Pass the file directly to OpenAI's transcription API
             response = openai.audio.transcriptions.create(
                 model="whisper-1",
-                file=file_object,  # Streamlit's file object should be passed as is
+                file=file_io,  # Passing the BytesIO object to OpenAI
             )
 
             st.write("Transcription successful.")
@@ -54,6 +60,7 @@ else:
         except Exception as e:
             st.write(f"Error in audio transcription: {e}")
             return f"Error in audio transcription: {e}"
+
 
 
     # Tool: Classify Text as Interview
