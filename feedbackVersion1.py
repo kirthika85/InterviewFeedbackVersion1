@@ -40,7 +40,7 @@ else:
                     model="whisper-1",
                     file=audio_file,
                 )
-            return response["text"]
+            return response.text
         except Exception as e:
             return f"Error in audio transcription: {e}"
 
@@ -144,11 +144,16 @@ else:
                 temp_audio_file.write(uploaded_audio.read())
                 temp_audio_file_path = temp_audio_file.name
 
-            # Move the file to a known location (e.g., temp directory)
+            # Ensure the file is available by moving it to /tmp directory
             persistent_audio_path = os.path.join("/tmp", os.path.basename(temp_audio_file_path))
             shutil.move(temp_audio_file_path, persistent_audio_path)
 
-            # Check if the file is saved properly
+            # Verify if the file exists immediately after saving
+            if not os.path.exists(persistent_audio_path):
+                st.warning(f"Error: The file was not saved correctly at {persistent_audio_path}.")
+                return
+
+            # Check if the file is accessible
             st.write(f"Saved audio file path: {persistent_audio_path}")
 
             # Define the query for the agent
