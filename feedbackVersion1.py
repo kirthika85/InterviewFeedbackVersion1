@@ -95,15 +95,15 @@ else:
         1. Alignment with job description ({job_description})
         2. Clarity of communication and confidence.
         3. Strength of their responses to key questions.
-        4. Areas of improvement with actionable advice.
-        5. Overall assessment and a final score out of 100.
+        4. Overall assessment and a final score out of 100.
+        5. Areas of improvement with actionable advice.
 
-        Format the output as:
+        Format the output exactly as follows:
         - Alignment Score: [Score/100]
         - Clarity Score: [Score/100]
         - Strength Score: [Score/100]
         - Overall Score: [Score/100]
-        - Areas of Improvement: [Explanation]
+        - Areas of Improvement: [Detailed explanation with actionable advice]
         """
         try:
             response = openai.chat.completions.create(
