@@ -140,20 +140,28 @@ else:
         if not uploaded_audio:
             st.warning("Please upload an audio file.")
         else:
-            # Save the uploaded audio to a temporary file and move it to a persistent location
+            # Save the uploaded audio to a temporary file
             with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio_file:
                 temp_audio_file.write(uploaded_audio.read())
                 temp_audio_file_path = temp_audio_file.name
 
-            # Ensure the file is available by moving it to /tmp directory
-            persistent_audio_path = os.path.join("/tmp", os.path.basename(temp_audio_file_path))
-            shutil.copy(temp_audio_file_path, persistent_audio_path)  # Use shutil.copy to avoid file removal
+            # Ensure the file is available by checking the path
+            st.write(f"Saved temporary audio file path: {temp_audio_file_path}")
 
-            # Verify if the file exists immediately after saving
+            # Verify the path and prevent copy if paths are the same
+            if temp_audio_file_path != '/tmp/tmpkwxq0n7s.mp3':
+                # Move the file to persistent location if needed
+                persistent_audio_path = os.path.join("/tmp", os.path.basename(temp_audio_file_path))
+                shutil.move(temp_audio_file_path, persistent_audio_path)
+                st.write(f"Moved to persistent location: {persistent_audio_path}")
+            else:
+                persistent_audio_path = temp_audio_file_path  # Use the temp file path directly
+
+            # Ensure file exists after moving
             if not os.path.exists(persistent_audio_path):
                 st.warning(f"Error: The file was not saved correctly at {persistent_audio_path}.")
             else:
-                st.write(f"File copied successfully to: {persistent_audio_path}")
+                st.write(f"File is accessible at: {persistent_audio_path}")
 
             # Adding a small delay to ensure the file is available before proceeding
             time.sleep(1)  # Sleep for 1 second (you can adjust this value)
