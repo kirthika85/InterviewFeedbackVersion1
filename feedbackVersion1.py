@@ -28,16 +28,20 @@ else:
     # Tool: Transcribe Audio
     def transcribe_audio(file_object):
         try:
+            st.write("Attempting to transcribe the audio...")
             response = openai.audio.transcriptions.create(
                 model="whisper-1",
                 file=file_object,
             )
+            st.write("Transcription successful.")
             return response.text
         except Exception as e:
+            st.write(f"Error in audio transcription: {e}")
             return f"Error in audio transcription: {e}"
 
     # Tool: Classify Text as Interview
     def is_interview(text):
+        st.write(f"Classifying the following text as interview or not:\n{text}")
         prompt = f"""
         You are a classifier. Analyze the following text and determine if it is likely from an interview conversation. 
         Respond with "Yes" if it is an interview, and "No" otherwise.
@@ -51,12 +55,16 @@ else:
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=10,
             )
-            return response.choices[0].message.content.strip().lower() == "yes"
+            result = response.choices[0].message.content.strip().lower()
+            st.write(f"Classification result: {result}")
+            return result == "yes"
         except Exception as e:
+            st.write(f"Error in classification: {e}")
             return False
 
     # Tool: Generate Feedback
     def generate_feedback(interview_text, job_description, company_name):
+        st.write("Generating feedback based on the interview text...")
         prompt = f"""
         You are an expert interviewer and career coach. Analyze the candidate's interview performance for the position at {company_name}.
         The interview text provided is as follows:
@@ -83,8 +91,10 @@ else:
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=2000,
             )
+            st.write("Feedback generation successful.")
             return response.choices[0].message.content
         except Exception as e:
+            st.write(f"Error generating feedback: {e}")
             return f"Error generating feedback: {e}"
 
     # Tools for the Agent
@@ -131,8 +141,8 @@ else:
         if not uploaded_audio:
             st.warning("Please upload an audio file.")
         else:
-            # Log the upload
             st.write("Audio file uploaded successfully.")
+            st.write(f"Audio file details: {uploaded_audio.name}, {uploaded_audio.type}")
 
             # Define the query for the agent
             input_data = f"""
@@ -146,7 +156,9 @@ else:
             """
 
             # Run the agent with the uploaded file object
+            st.write("Running agent to process the input data...")
             result = agent.run(input=input_data)
+            st.write("Agent processing complete.")
 
             # Display the agent result
             st.write("Agent Result:", result)
@@ -165,8 +177,11 @@ else:
 
                 if matches:
                     scores = {match[0]: int(match[1]) for match in matches}
+                    st.write("Extracted Scores:")
                     for criterion, score in scores.items():
                         st.write(f"{criterion} Score: {score}/100")
+                else:
+                    st.write("No scores found in feedback.")
 
             with tab2:
                 st.subheader("Score Analysis")
@@ -174,6 +189,7 @@ else:
                 if scores:
                     # Ensure no score is zero before plotting
                     if all(value > 0 for value in scores.values()):
+                        st.write("Plotting score distribution...")
                         fig, ax = plt.subplots()
                         ax.pie(
                             scores.values(),
