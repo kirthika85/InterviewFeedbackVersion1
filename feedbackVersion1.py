@@ -6,6 +6,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.agents import initialize_agent, Tool
 from langchain.chains.conversation.memory import ConversationBufferMemory
 import re
+from io import BytesIO
 
 # Streamlit Title
 st.title("Interview Feedback Generator")
@@ -28,11 +29,18 @@ else:
     # Tool: Transcribe Audio
     def transcribe_audio(file_object):
         try:
+            # Ensure the file is read as bytes
             st.write("Attempting to transcribe the audio...")
+        
+            # Read the uploaded file as bytes
+            audio_bytes = file_object.getvalue()
+
+            # Pass the byte data to the API
             response = openai.audio.transcriptions.create(
                 model="whisper-1",
-                file=file_object,
+                file=BytesIO(audio_bytes),  # Convert to BytesIO for the API
             )
+        
             st.write("Transcription successful.")
             return response.text
         except Exception as e:
