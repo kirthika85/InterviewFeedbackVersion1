@@ -1,3 +1,4 @@
+import time
 import streamlit as st
 import openai
 import os
@@ -9,7 +10,6 @@ from langchain.chat_models import ChatOpenAI
 from langchain.agents import initialize_agent, Tool
 from langchain.chains.conversation.memory import ConversationBufferMemory
 import re
-import time  # For adding a short delay
 
 # Streamlit Title
 st.title("Interview Feedback Generator")
@@ -148,23 +148,30 @@ else:
             # Ensure the file is available by checking the path
             st.write(f"Saved temporary audio file path: {temp_audio_file_path}")
 
-            # Verify the path and prevent copy if paths are the same
-            if temp_audio_file_path != '/tmp/tmpkwxq0n7s.mp3':
-                # Move the file to persistent location if needed
-                persistent_audio_path = os.path.join("/tmp", os.path.basename(temp_audio_file_path))
+            # Ensure the file is correctly written and available
+            if not os.path.exists(temp_audio_file_path):
+                st.warning(f"Error: The temporary file {temp_audio_file_path} could not be accessed.")
+                return
+
+            # Add a delay before continuing (to ensure the file is fully written)
+            time.sleep(1)
+
+            # Move the file to persistent location if necessary
+            persistent_audio_path = os.path.join("/tmp", os.path.basename(temp_audio_file_path))
+
+            if temp_audio_file_path != persistent_audio_path:
                 shutil.move(temp_audio_file_path, persistent_audio_path)
                 st.write(f"Moved to persistent location: {persistent_audio_path}")
             else:
                 persistent_audio_path = temp_audio_file_path  # Use the temp file path directly
 
-            # Ensure file exists after moving
+            # Ensure file exists before proceeding
             if not os.path.exists(persistent_audio_path):
                 st.warning(f"Error: The file was not saved correctly at {persistent_audio_path}.")
-            else:
-                st.write(f"File is accessible at: {persistent_audio_path}")
+                return
 
-            # Adding a small delay to ensure the file is available before proceeding
-            time.sleep(1)  # Sleep for 1 second (you can adjust this value)
+            # Log the path for debugging
+            st.write(f"Audio file path being passed to agent: {persistent_audio_path}")
 
             # Define the query for the agent
             query = f"""
@@ -176,9 +183,6 @@ else:
                - Company Name: {company_name}
             4. Provide feedback and scores, or indicate if it is not an interview.
             """
-
-            # Log the path for debugging
-            st.write(f"Audio file path being passed to agent: {persistent_audio_path}")
 
             # Run agent with the 'input' key
             result = agent.run(input=query)
