@@ -29,18 +29,15 @@ else:
     # Tool: Transcribe Audio
     def transcribe_audio(file_object):
         try:
-            # Ensure the file is read as bytes
+            # Ensure the file is correctly passed
             st.write("Attempting to transcribe the audio...")
-        
-            # Read the uploaded file as bytes
-            audio_bytes = file_object.getvalue()
 
-            # Pass the byte data to the API
+            # OpenAI's transcription expects the file to be uploaded in a format like io.BytesIO
             response = openai.audio.transcriptions.create(
                 model="whisper-1",
-                file=BytesIO(audio_bytes),  # Convert to BytesIO for the API
+                file=file_object,  # Pass the file directly
             )
-        
+
             st.write("Transcription successful.")
             return response.text
         except Exception as e:
