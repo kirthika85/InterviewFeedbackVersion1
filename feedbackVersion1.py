@@ -28,22 +28,14 @@ else:
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
     # Tool: Transcribe Audio (Updated to handle byte stream properly)
-    def transcribe_audio(file_content):
+    def transcribe_audio(file_path):
         try:
-            # Create a temporary file to store the audio content
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.mp3') as temp_file:
-                temp_file.write(file_content)
-                temp_file.close()
-                
-                # Open the temporary file and transcribe it
-                with open(temp_file.name, "rb") as audio_file:
-                    response = openai.audio.transcriptions.create(
-                        model="whisper-1",
-                        file=audio_file,
-                    )
-                    
-            # Return the transcription text
-            return response.text
+            with open(file_path, "rb") as audio_file:
+                response = openai.audio.transcriptions.create(
+                    model="whisper-1",
+                    file=audio_file,
+                )
+            return response["text"]
         except Exception as e:
             return f"Error in audio transcription: {e}"
 
@@ -142,27 +134,26 @@ else:
         if not uploaded_audio:
             st.warning("Please upload an audio file.")
         else:
-            # Read the audio file as byte stream
-            audio_content = uploaded_audio.read()
+            # Save the uploaded audio to a temporary file
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio_file:
+                temp_audio_file.write(uploaded_audio.read())
+                temp_audio_file_path = temp_audio_file.name
 
-            # Pass the uploaded audio directly to the agent
+            # Define the query for the agent
             query = f"""
-            1. Transcribe the audio file.
+            Analyze the uploaded audio file for interview feedback:
+            1. Transcribe the audio file located at '{temp_audio_file_path}'.
             2. Determine if the transcription represents an interview conversation.
             3. If it is an interview, generate detailed feedback based on the job description:
                - Job Description: {job_description}
                - Company Name: {company_name}
+            4. Provide feedback and scores, or indicate if it is not an interview.
             """
 
-            # Pass the audio content to the transcribe_audio tool manually, and include other tools in agent run.
-            tools_input = {
-                "Transcribe Audio": audio_content,
-                "Classify Text": None,  # You can provide transcribed text here later
-                "Generate Feedback": f"{job_description}|{company_name}",  # Placeholder for feedback generation
-            }
+            # Run agent with the 'input' key
+            result = agent.run(input=query)
 
-            # Run the agent and pass tools input explicitly
-            result = agent.run(input=query, tools_input=tools_input)
+            # Display agent result
             st.write("Agent Result:", result)
 
             # Display results in tabs
@@ -202,3 +193,6 @@ else:
                         st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
                 else:
                     st.warning("No scores were detected in the feedback.")
+
+            # Clean up the temporary audio file
+            os.remove(temp_audio_file_path)
