@@ -151,7 +151,7 @@ else:
             # Ensure the file is correctly written and available
             if not os.path.exists(temp_audio_file_path):
                 st.warning(f"Error: The temporary file {temp_audio_file_path} could not be accessed.")
-                return  # Use return instead of 'return False'
+                st.stop()  # Stop the execution without using 'return'
 
             # Add a delay before continuing (to ensure the file is fully written)
             time.sleep(1)
@@ -168,7 +168,7 @@ else:
             # Ensure file exists before proceeding
             if not os.path.exists(persistent_audio_path):
                 st.warning(f"Error: The file was not saved correctly at {persistent_audio_path}.")
-                return  # Use return instead of 'return False'
+                st.stop()  # Stop the execution without using 'return'
 
             # Log the path for debugging
             st.write(f"Audio file path being passed to agent: {persistent_audio_path}")
