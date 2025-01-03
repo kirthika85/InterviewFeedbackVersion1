@@ -6,7 +6,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.agents import initialize_agent, Tool
 from langchain.chains.conversation.memory import ConversationBufferMemory
 import re
-from io import BytesIO
+import io
 
 # Streamlit Title
 st.title("Interview Feedback Generator")
@@ -29,13 +29,18 @@ else:
     # Tool: Transcribe Audio
     def transcribe_audio(file_object):
         try:
-            # Ensure the file is correctly passed
             st.write("Attempting to transcribe the audio...")
 
-            # OpenAI's transcription expects the file to be uploaded in a format like io.BytesIO
+            # Check the type of file_object (Streamlit file uploader object)
+            if isinstance(file_object, io.BytesIO):
+                st.write("The file is in the correct format (BytesIO). Proceeding with transcription.")
+            else:
+                st.write(f"Warning: The file is not a valid format. It's of type {type(file_object)}")
+
+            # Pass the file directly to OpenAI's API
             response = openai.audio.transcriptions.create(
                 model="whisper-1",
-                file=file_object,  # Pass the file directly
+                file=file_object,  # Streamlit's file object should already be in a suitable format
             )
 
             st.write("Transcription successful.")
