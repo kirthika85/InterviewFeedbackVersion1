@@ -133,23 +133,13 @@ else:
         if not uploaded_audio:
             st.warning("Please upload an audio file.")
         else:
-            # Read the audio file as byte stream (not as a file path)
+            # Read the audio file as byte stream
             audio_content = uploaded_audio.read()
 
-            # Combine query and tools_input into a single message
-            query = f"""
-            Analyze the uploaded audio file for interview feedback:
-            1. Transcribe the audio file.
-            2. Determine if the transcription represents an interview conversation.
-            3. If it is an interview, generate detailed feedback based on the job description:
-               - Job Description: {job_description}
-               - Company Name: {company_name}
-            4. Provide feedback and scores, or indicate if it is not an interview.
-            """
+            # Pass the byte stream to the agent, ensuring it is processed by the tools correctly
+            result = agent.run(input="Transcribe Audio", tools_input={"file_content": audio_content})
 
-            # Run the agent, the 'Transcribe Audio' tool should handle the audio file
-            result = agent.run(query)  # No need to pass 'tools_input', agent will handle that internally
-
+            # Display agent result
             st.write("Agent Result:", result)
 
             # Display results in tabs
@@ -189,4 +179,3 @@ else:
                         st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
                 else:
                     st.warning("No scores were detected in the feedback.")
-
