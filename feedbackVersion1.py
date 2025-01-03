@@ -27,36 +27,33 @@ else:
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
     # Tool: Transcribe Audio
-import io
+    def transcribe_audio(file_object):
+        try:
+            st.write("Attempting to transcribe the audio...")
 
-# Tool: Transcribe Audio
-def transcribe_audio(file_object):
-    try:
-        st.write("Attempting to transcribe the audio...")
-
-        # Debugging: Check the type of the uploaded file object
-        st.write(f"Uploaded file type: {type(file_object)}")
+            # Debugging: Check the type of the uploaded file object
+            st.write(f"Uploaded file type: {type(file_object)}")
         
-        # Debugging: Preview the first 100 bytes of the uploaded file (to check its content)
-        st.write(f"File content preview: {file_object.getvalue()[:100]}")  # Preview the first 100 bytes
+            # Debugging: Preview the first 100 bytes of the uploaded file (to check its content)
+            st.write(f"File content preview: {file_object.getvalue()[:100]}")  # Preview the first 100 bytes
 
-        # Ensure the file_object is in the correct format (i.e., BytesIO)
-        if isinstance(file_object, io.BytesIO):
-            st.write("The file is in the correct format (BytesIO). Proceeding with transcription.")
-        else:
-            st.write(f"Error: The uploaded file is of type {type(file_object)}. Expected BytesIO.")
+            # Ensure the file_object is in the correct format (i.e., BytesIO)
+            if isinstance(file_object, io.BytesIO):
+                st.write("The file is in the correct format (BytesIO). Proceeding with transcription.")
+            else:
+                st.write(f"Error: The uploaded file is of type {type(file_object)}. Expected BytesIO.")
 
-        # Pass the file directly to OpenAI's API
-        response = openai.audio.transcriptions.create(
-            model="whisper-1",
-            file=file_object,  # Streamlit's file object should be passed as is
-        )
+            # Pass the file directly to OpenAI's API
+            response = openai.audio.transcriptions.create(
+                model="whisper-1",
+                file=file_object,  # Streamlit's file object should be passed as is
+            )
 
-        st.write("Transcription successful.")
-        return response.text
-    except Exception as e:
-        st.write(f"Error in audio transcription: {e}")
-        return f"Error in audio transcription: {e}"
+            st.write("Transcription successful.")
+            return response.text
+        except Exception as e:
+            st.write(f"Error in audio transcription: {e}")
+            return f"Error in audio transcription: {e}"
 
 
     # Tool: Classify Text as Interview
