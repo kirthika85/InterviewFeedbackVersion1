@@ -34,7 +34,7 @@ else:
                 model="whisper-1",
                 file=file_content,
             )
-            return response.text
+            return response["text"]
         except Exception as e:
             return f"Error in audio transcription: {e}"
 
@@ -136,8 +136,19 @@ else:
             # Read the audio file as byte stream
             audio_content = uploaded_audio.read()
 
-            # Pass the byte stream to the agent, ensuring it is processed by the tools correctly
-            result = agent.run(input="Transcribe Audio", tools_input={"file_content": audio_content})
+            # Define the query for the agent
+            query = f"""
+            Analyze the uploaded audio file for interview feedback:
+            1. Transcribe the audio file.
+            2. Determine if the transcription represents an interview conversation.
+            3. If it is an interview, generate detailed feedback based on the job description:
+               - Job Description: {job_description}
+               - Company Name: {company_name}
+            4. Provide feedback and scores, or indicate if it is not an interview.
+            """
+
+            # Run agent with the single 'input' key
+            result = agent.run(input=query)
 
             # Display agent result
             st.write("Agent Result:", result)
