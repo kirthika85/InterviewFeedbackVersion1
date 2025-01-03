@@ -27,11 +27,6 @@ else:
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
     # Tool: Transcribe Audio
-    import openai
-import streamlit as st
-import io
-
-    # Tool: Transcribe Audio
     def transcribe_audio(file_object):
         try:
             # Ensure the file object passed is in the correct format (BytesIO)
