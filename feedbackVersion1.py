@@ -9,6 +9,7 @@ from langchain.chat_models import ChatOpenAI
 from langchain.agents import initialize_agent, Tool
 from langchain.chains.conversation.memory import ConversationBufferMemory
 import re
+import time  # For adding a short delay
 
 # Streamlit Title
 st.title("Interview Feedback Generator")
@@ -146,15 +147,16 @@ else:
 
             # Ensure the file is available by moving it to /tmp directory
             persistent_audio_path = os.path.join("/tmp", os.path.basename(temp_audio_file_path))
-            shutil.move(temp_audio_file_path, persistent_audio_path)
+            shutil.copy(temp_audio_file_path, persistent_audio_path)  # Use shutil.copy to avoid file removal
 
             # Verify if the file exists immediately after saving
             if not os.path.exists(persistent_audio_path):
                 st.warning(f"Error: The file was not saved correctly at {persistent_audio_path}.")
-        
+            else:
+                st.write(f"File copied successfully to: {persistent_audio_path}")
 
-            # Check if the file is accessible
-            st.write(f"Saved audio file path: {persistent_audio_path}")
+            # Adding a small delay to ensure the file is available before proceeding
+            time.sleep(1)  # Sleep for 1 second (you can adjust this value)
 
             # Define the query for the agent
             query = f"""
@@ -167,10 +169,13 @@ else:
             4. Provide feedback and scores, or indicate if it is not an interview.
             """
 
+            # Log the path for debugging
+            st.write(f"Audio file path being passed to agent: {persistent_audio_path}")
+
             # Run agent with the 'input' key
             result = agent.run(input=query)
 
-            # Display agent result
+            # Display the agent result
             st.write("Agent Result:", result)
 
             # Display results in tabs
