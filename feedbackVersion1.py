@@ -196,6 +196,10 @@ else:
                 st.subheader("Feedback Analysis")
                 st.write(result)
 
+                
+            with tab2:
+                st.subheader("Score Analysis")
+
                 # Extract and display scores
                 scores = {}
                 score_pattern = re.compile(r"(\w+)\s*Score:\s*(\d+)\s*/\s*100")
@@ -209,9 +213,7 @@ else:
                 else:
                     st.write("No scores found in feedback.")
 
-            with tab2:
-                st.subheader("Score Analysis")
-
+                
                 if scores:
                     # Ensure no score is zero before plotting
                     if all(value > 0 for value in scores.values()):
