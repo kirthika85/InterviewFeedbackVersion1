@@ -29,10 +29,10 @@ else:
     def transcribe_audio(file_object):
         try:
             # Ensure the file object passed is in the correct format (BytesIO)
-            st.write("Attempting to transcribe the audio...")
+            #st.write("Attempting to transcribe the audio...")
 
             # Check the type of the uploaded file object
-            st.write(f"Uploaded file type: {type(file_object)}")
+            #st.write(f"Uploaded file type: {type(file_object)}")
 
             if isinstance(file_object, io.BytesIO):
                 file_bytes = file_object.getvalue()
@@ -60,7 +60,7 @@ else:
 
     # Tool: Classify Text as Interview
     def is_interview(text):
-        st.write(f"Classifying the following text as interview or not:\n{text}")
+        #st.write(f"Classifying the following text as interview or not:\n{text}")
         prompt = f"""
         You are a classifier. Analyze the following text and determine if it is likely from an interview conversation. 
         Respond with "Yes" if it is an interview, and "No" otherwise.
@@ -75,7 +75,7 @@ else:
                 max_tokens=10,
             )
             result = response.choices[0].message.content.strip().lower()
-            st.write(f"Classification result: {result}")
+           #st.write(f"Classification result: {result}")
             return result == "yes"
         except Exception as e:
             st.write(f"Error in classification: {e}")
@@ -173,7 +173,7 @@ else:
             st.warning("Please upload an audio file.")
         else:
             st.write("Audio file uploaded successfully.")
-            st.write(f"Audio file details: {uploaded_audio.name}, {uploaded_audio.type}")
+            #st.write(f"Audio file details: {uploaded_audio.name}, {uploaded_audio.type}")
 
             # Define the query for the agent
             input_data = f"""
@@ -192,7 +192,7 @@ else:
             st.write("Agent processing complete.")
 
             # Display the agent result
-            st.write("Agent Result:", result)
+            #st.write("Agent Result:", result)
 
             # Display results in tabs
             tab1, tab2 = st.tabs(["📋 Feedback Analysis", "📊 Score Analysis"])
