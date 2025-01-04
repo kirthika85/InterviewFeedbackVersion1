@@ -209,32 +209,32 @@ else:
                 if matches:
                     scores = {match[0]: int(match[1]) for match in matches}
 
-                # Display scores in a table
-                st.table({"Criteria": list(scores.keys()), "Score": list(scores.values())})
+                    # Display scores in a table
+                    st.table({"Criteria": list(scores.keys()), "Score": list(scores.values())})
 
-                # Plot scores using a pie chart
-                if all(value > 0 for value in scores.values()):
-                    st.write("Visualizing score distribution...")
-                    fig, ax = plt.subplots(figsize=(6, 6))
-                    wedges, texts, autotexts = ax.pie(
-                    scores.values(),
-                    labels=scores.keys(),
-                    autopct='%1.1f%%',
-                    startangle=90,
-                    colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'],
-                    textprops={'fontsize': 10},
-                    )
-                    ax.axis('equal')  # Equal aspect ratio ensures the pie chart is circular
-                    ax.set_title("Performance Score Distribution", fontsize=14)
+                    # Plot scores using a pie chart
+                    if all(value > 0 for value in scores.values()):
+                        st.write("Visualizing score distribution...")
+                        fig, ax = plt.subplots(figsize=(6, 6))
+                        wedges, texts, autotexts = ax.pie(
+                        scores.values(),
+                        labels=scores.keys(),
+                        autopct='%1.1f%%',
+                        startangle=90,
+                        colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'],
+                        textprops={'fontsize': 10},
+                        )
+                        ax.axis('equal')  # Equal aspect ratio ensures the pie chart is circular
+                        ax.set_title("Performance Score Distribution", fontsize=14)
 
-                    # Style autotext for better visibility
-                    for autotext in autotexts:
-                        autotext.set_color('white')
-                        autotext.set_fontsize(10)
+                        # Style autotext for better visibility
+                        for autotext in autotexts:
+                            autotext.set_color('white')
+                            autotext.set_fontsize(10)
 
-                    st.pyplot(fig)
-            else:
-                st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
-        else:
-            st.warning("No scores were detected in the feedback.")
+                        st.pyplot(fig)
+                    else:
+                        st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
+                else:
+                    st.warning("No scores were detected in the feedback.")
 
