@@ -1,4 +1,3 @@
-import time
 import streamlit as st
 import openai
 import matplotlib.pyplot as plt
@@ -190,13 +189,15 @@ else:
             st.write("Agent Result:", result)
 
             # Display results in tabs
-            tab1, tab2 = st.tabs(["Feedback Analysis", "Score Analysis"])
+            tab1, tab2 = st.tabs(["📋 Feedback Analysis", "📊 Score Analysis"])
 
+            # Feedback Analysis Tab
             with tab1:
-                st.subheader("Feedback Analysis")
+                st.subheader("Detailed Feedback Analysis")
+                st.markdown("Here is a detailed breakdown of the feedback:")
                 st.write(result)
 
-                
+            # Score Analysis Tab
             with tab2:
                 st.subheader("Score Analysis")
 
@@ -207,28 +208,33 @@ else:
 
                 if matches:
                     scores = {match[0]: int(match[1]) for match in matches}
-                    st.write("Extracted Scores:")
-                    for criterion, score in scores.items():
-                        st.write(f"{criterion} Score: {score}/100")
-                else:
-                    st.write("No scores found in feedback.")
 
-                
-                if scores:
-                    # Ensure no score is zero before plotting
-                    if all(value > 0 for value in scores.values()):
-                        st.write("Plotting score distribution...")
-                        fig, ax = plt.subplots()
-                        ax.pie(
-                            scores.values(),
-                            labels=scores.keys(),
-                            autopct='%1.1f%%',
-                            startangle=90,
-                            colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'],
-                        )
-                        ax.axis('equal')
-                        st.pyplot(fig)
-                    else:
-                        st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
-                else:
-                    st.warning("No scores were detected in the feedback.")
+                # Display scores in a table
+                st.table({"Criteria": list(scores.keys()), "Score": list(scores.values())})
+
+                # Plot scores using a pie chart
+                if all(value > 0 for value in scores.values()):
+                    st.write("Visualizing score distribution...")
+                    fig, ax = plt.subplots(figsize=(6, 6))
+                    wedges, texts, autotexts = ax.pie(
+                    scores.values(),
+                    labels=scores.keys(),
+                    autopct='%1.1f%%',
+                    startangle=90,
+                    colors=['#66b3ff', '#99ff99', '#ffcc99', '#ff9999'],
+                    textprops={'fontsize': 10},
+                    )
+                    ax.axis('equal')  # Equal aspect ratio ensures the pie chart is circular
+                    ax.set_title("Performance Score Distribution", fontsize=14)
+
+                    # Style autotext for better visibility
+                    for autotext in autotexts:
+                        autotext.set_color('white')
+                        autotext.set_fontsize(10)
+
+                    st.pyplot(fig)
+            else:
+                st.warning("Some scores are missing or zero. Pie chart visualization is not possible.")
+        else:
+            st.warning("No scores were detected in the feedback.")
+
