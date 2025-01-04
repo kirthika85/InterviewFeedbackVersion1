@@ -92,17 +92,23 @@ else:
 
         Evaluate the following criteria on a scale of 0 to 100:
         1. Alignment with job description ({job_description})
-        2. Clarity of communication and confidence.
-        3. Strength of their responses to key questions.
-        4. Overall assessment and a final score out of 100.
-        5. Areas of improvement with actionable advice.
+        2. Clarity of communication
+        3. Strength of responses to key questions
+        4. Technical competence
+        5. Cultural fit with {company_name}
+        6. Problem-solving skills
+        7. Overall assessment
 
         Format the output exactly as follows:
         - Alignment Score: [Score/100]
         - Clarity Score: [Score/100]
         - Strength Score: [Score/100]
+        - Technical Competence Score: [Score/100]
+        - Cultural Fit Score: [Score/100]
+        - Problem-Solving Score: [Score/100]
         - Overall Score: [Score/100]
-        - Areas of Improvement: [Detailed explanation with actionable advice]
+        - Areas of Improvement: [Detailed explanation with actionable advice for each criterion scoring below 70]
+        - Key Strengths: [Brief summary of the candidate's standout qualities]
         """
         try:
             response = openai.chat.completions.create(
@@ -203,7 +209,7 @@ else:
 
                 # Extract and display scores
                 scores = {}
-                score_pattern = re.compile(r"(\w+)\s*Score:\s*(\d+)\s*/\s*100")
+                score_pattern = re.compile(r"(\w+(?:\s+\w+)?)\s*Score:\s*(\d+)\s*/\s*100")
                 matches = score_pattern.findall(result)
 
                 if matches:
