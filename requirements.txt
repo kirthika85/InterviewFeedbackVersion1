@@ -1,7 +1,7 @@
 streamlit
 openai
 langchain
-langchain_community
+langchain-community
 langchain_openai
 langchain_core
 matplotlib
