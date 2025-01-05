@@ -201,7 +201,9 @@ else:
             with tab1:
                 st.subheader("Detailed Feedback Analysis")
                 st.markdown("Here is a detailed breakdown of the feedback:")
-                st.write(result)
+                feedback = result
+                detailed_feedback = re.sub(score_pattern, "", feedback)
+                st.write(detailed_feedback)
 
             # Score Analysis Tab
             with tab2:
