@@ -128,7 +128,7 @@ else:
             response = openai.chat.completions.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=2000,
+                max_tokens=3000,
             )
             st.write("Feedback generation successful.")
             return response.choices[0].message.content
