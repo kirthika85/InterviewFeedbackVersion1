@@ -193,9 +193,6 @@ else:
 
             # Display the agent result
             #st.write("Agent Result:", result)
-            scores = {}
-            score_pattern = re.compile(r"(\w+(?:\s+\w+)?)\s*Score:\s*(\d+)\s*/\s*100")
-            matches = score_pattern.findall(result)
             
             # Display results in tabs
             tab1, tab2 = st.tabs(["📋 Feedback Analysis", "📊 Score Analysis"])
@@ -204,18 +201,18 @@ else:
             with tab1:
                 st.subheader("Detailed Feedback Analysis")
                 st.markdown("Here is a detailed breakdown of the feedback:")
-                feedback = result
-                detailed_feedback = re.sub(score_pattern, "", feedback)
-                st.write(detailed_feedback)
+                #feedback = result
+                #detailed_feedback = re.sub(score_pattern, "", feedback)
+                st.write(result)
 
             # Score Analysis Tab
             with tab2:
                 st.subheader("Score Analysis")
 
                 # Extract and display scores
-                #scores = {}
-                #score_pattern = re.compile(r"(\w+(?:\s+\w+)?)\s*Score:\s*(\d+)\s*/\s*100")
-                #matches = score_pattern.findall(result)
+                scores = {}
+                score_pattern = re.compile(r"(\w+(?:\s+\w+)?)\s*Score:\s*(\d+)\s*/\s*100")
+                matches = score_pattern.findall(result)
 
                 if matches:
                     scores = {match[0]: int(match[1]) for match in matches}
