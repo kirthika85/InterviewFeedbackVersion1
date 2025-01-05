@@ -99,8 +99,7 @@ else:
         6. Problem-solving skills
         7. Overall assessment
 
-        Provide detailed feedback in this format:
-        #Format the output exactly as follows:
+        Provide detailed feedback in this format and format the output exactly as follows:
         - Alignment Score: [Score/100]
         - Clarity Score: [Score/100]
         - Strength Score: [Score/100]
