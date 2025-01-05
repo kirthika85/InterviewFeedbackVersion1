@@ -99,7 +99,16 @@ else:
         6. Problem-solving skills
         7. Overall assessment
 
-        Provide detailed feedback in this format:
+        For each criterion, provide detailed qualitative feedback without mentioning scores. Use this structure:
+        - Alignment: [Feedback]
+        - Clarity: [Feedback]
+        - Strength: [Feedback]
+        - Technical Competence: [Feedback]
+        - Cultural Fit: [Feedback]
+        - Problem-Solving: [Feedback]
+        - Overall: [Feedback]
+    
+        Provide the scores for each criterion in this structure:
         - Alignment Score: [Score/100]
         - Clarity Score: [Score/100]
         - Strength Score: [Score/100]
@@ -107,8 +116,13 @@ else:
         - Cultural Fit Score: [Score/100]
         - Problem-Solving Score: [Score/100]
         - Overall Score: [Score/100]
-        - Areas of Improvement: [Detailed explanation with actionable advice for each criterion scoring below 70]
-        - Key Strengths: [Brief summary of the candidate's standout qualities]
+    
+        Areas of Improvement:
+        [Provide actionable advice for improving performance in each criterion that scored below 70.]
+
+        Key Strengths:
+        [Summarize the standout qualities of the candidate.]
+        
         """
         try:
             response = openai.chat.completions.create(
