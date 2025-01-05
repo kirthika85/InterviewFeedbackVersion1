@@ -225,7 +225,7 @@ else:
             with tab1:
                 st.subheader("Detailed Feedback Analysis")
                 st.markdown("Here is a detailed breakdown of the feedback:")
-                st.write(detailed_feedback)
+                st.write(result)
 
             # Score Analysis Tab
             with tab2:
@@ -234,7 +234,7 @@ else:
                 # Extract and display scores
                 scores = {}
                 score_pattern = re.compile(r"(\w+(?:\s+\w+)?)\s*Score:\s*(\d+)\s*/\s*100")
-                matches = score_pattern.findall(score_details)
+                matches = score_pattern.findall(result)
 
                 if matches:
                     scores = {match[0]: int(match[1]) for match in matches}
