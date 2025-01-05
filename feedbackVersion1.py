@@ -92,14 +92,14 @@ else:
 
         Evaluate the following criteria on a scale of 0 to 100:
         1. Alignment with job description ({job_description})
-        2. Clarity of communication
-        3. Strength of responses to key questions
+        2. Clarity of communication and confidence.
+        3. Strength of responses to key questions.
         4. Technical competence
         5. Cultural fit with {company_name}
         6. Problem-solving skills
         7. Overall assessment
 
-        Provide detailed feedback in this format and format the output exactly as follows:
+        Provide detailed feedback in this format:
         - Alignment Score: [Score/100]
         - Clarity Score: [Score/100]
         - Strength Score: [Score/100]
