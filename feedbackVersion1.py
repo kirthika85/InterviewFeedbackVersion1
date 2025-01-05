@@ -207,7 +207,17 @@ else:
 
             # Display the agent result
             #st.write("Agent Result:", result)
-            
+
+            feedback_section = re.search(
+                            r"(.*)(?=Areas of Improvement:)", result, re.DOTALL
+            )
+            scores_section = re.search(
+                r"(Areas of Improvement:.*)", result, re.DOTALL
+            )
+
+            detailed_feedback = feedback_section.group(0) if feedback_section else "No detailed feedback available."
+            score_details = scores_section.group(0) if scores_section else "No score details available."
+
             # Display results in tabs
             tab1, tab2 = st.tabs(["📋 Feedback Analysis", "📊 Score Analysis"])
 
@@ -215,9 +225,7 @@ else:
             with tab1:
                 st.subheader("Detailed Feedback Analysis")
                 st.markdown("Here is a detailed breakdown of the feedback:")
-                #feedback = result
-                #detailed_feedback = re.sub(score_pattern, "", feedback)
-                st.write(result)
+                st.write(detailed_feedback)
 
             # Score Analysis Tab
             with tab2:
@@ -226,7 +234,7 @@ else:
                 # Extract and display scores
                 scores = {}
                 score_pattern = re.compile(r"(\w+(?:\s+\w+)?)\s*Score:\s*(\d+)\s*/\s*100")
-                matches = score_pattern.findall(result)
+                matches = score_pattern.findall(score_details)
 
                 if matches:
                     scores = {match[0]: int(match[1]) for match in matches}
