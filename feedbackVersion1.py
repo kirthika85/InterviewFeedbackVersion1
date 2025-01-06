@@ -240,7 +240,7 @@ else:
                     scores = {match[0]: int(match[1]) for match in matches}
 
                     # Display scores in a table
-                    st.table({"Criteria": list(scores.keys()), "Score": list(scores.values())})
+                    st.table({"Criteria": list(scores.keys()), "Score/100": list(scores.values())})
 
                     # Plot scores using a pie chart
                     if all(value > 0 for value in scores.values()):
