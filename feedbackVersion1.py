@@ -108,6 +108,12 @@ else:
         - Problem-Solving: [Feedback]
         - Overall: [Feedback]
     
+        Areas of Improvement:
+        [Provide actionable advice for improving performance in each criterion that scored below 70.]
+
+        Key Strengths:
+        [Summarize the standout qualities of the candidate.]
+
         Provide the scores for each criterion in this structure:
         - Alignment Score: [Score/100]
         - Clarity Score: [Score/100]
@@ -116,12 +122,6 @@ else:
         - Cultural Fit Score: [Score/100]
         - Problem-Solving Score: [Score/100]
         - Overall Score: [Score/100]
-    
-        Areas of Improvement:
-        [Provide actionable advice for improving performance in each criterion that scored below 70.]
-
-        Key Strengths:
-        [Summarize the standout qualities of the candidate.]
         
         """
         try:
@@ -216,8 +216,7 @@ else:
             )
 
             detailed_feedback = feedback_section.group(0) if feedback_section else "No detailed feedback available."
-            score_details = scores_section.group(0) if scores_section else "No score details available."
-
+            
             # Display results in tabs
             tab1, tab2 = st.tabs(["📋 Feedback Analysis", "📊 Score Analysis"])
 
