@@ -211,9 +211,6 @@ else:
             feedback_section = re.search(
                             r"(.*)(?=Areas of Improvement:)", result, re.DOTALL
             )
-            scores_section = re.search(
-                r"(Areas of Improvement:.*)", result, re.DOTALL
-            )
 
             detailed_feedback = feedback_section.group(0) if feedback_section else "No detailed feedback available."
             
@@ -224,7 +221,7 @@ else:
             with tab1:
                 st.subheader("Detailed Feedback Analysis")
                 st.markdown("Here is a detailed breakdown of the feedback:")
-                st.write(detailed_feedback)
+                st.write(result)
 
             # Score Analysis Tab
             with tab2:
