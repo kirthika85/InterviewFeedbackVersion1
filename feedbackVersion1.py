@@ -114,7 +114,7 @@ else:
         Key Strengths:
         [Summarize the standout qualities of the candidate.]
 
-        Provide Scores for each criterion in this structure:
+        Scores:
         - Alignment Score: [Score/100]
         - Clarity Score: [Score/100]
         - Strength Score: [Score/100]
@@ -122,6 +122,8 @@ else:
         - Cultural Fit Score: [Score/100]
         - Problem-Solving Score: [Score/100]
         - Overall Score: [Score/100]
+
+        Ensure that the 'Scores:' section always appears immediately after the 'Key Strengths:' section, maintaining this exact structure and order.        
         
         """
         try:
