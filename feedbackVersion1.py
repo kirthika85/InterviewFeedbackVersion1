@@ -107,10 +107,11 @@ else:
         - Cultural Fit: [Feedback]
         - Problem-Solving: [Feedback]
         - Overall: [Feedback]
-    
-        Areas of Improvement:[Provide actionable advice for improving performance in each criterion that scored below 70.]
 
-        Key Strengths:[Summarize the standout qualities of the candidate.]
+                
+        Areas of Improvement: [Provide actionable advice for improving performance in each criterion that scored below 70.]
+        
+        Key Strengths: [Summarize the standout qualities of the candidate.]
 
         Provide Scores for the criteria in this structure:
         - Alignment Score: [Score/100]
