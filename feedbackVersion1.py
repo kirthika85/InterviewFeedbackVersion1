@@ -207,7 +207,6 @@ else:
 
             # Display the agent result
             #st.write("Agent Result:", result)
-
                  
             # Display results in tabs
             tab1, tab2 = st.tabs(["📋 Feedback Analysis", "📊 Score Analysis"])
@@ -216,7 +215,17 @@ else:
             with tab1:
                 st.subheader("Detailed Feedback Analysis")
                 st.markdown("Here is a detailed breakdown of the feedback:")
-                st.write(result)
+
+                feedback_pattern = r"(?s).*Key Strengths:.*?\n(.*?)\nThe scores for each criterion are:"
+                feedback_match = re.search(feedback_pattern, result)
+
+                if feedback_match:
+                    feedback_content = feedback_match.group(0)  # Extract content up to "Key Strengths"
+                else:
+                    feedback_content = result  # Default to full result if no match found
+    
+                st.write(feedback_content)
+                #st.write(result)
 
             # Score Analysis Tab
             with tab2:
