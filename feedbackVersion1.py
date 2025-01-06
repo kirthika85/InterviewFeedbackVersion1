@@ -208,12 +208,7 @@ else:
             # Display the agent result
             #st.write("Agent Result:", result)
 
-            feedback_section = re.search(
-                            r"(.*)(?=Areas of Improvement:)", result, re.DOTALL
-            )
-
-            detailed_feedback = feedback_section.group(0) if feedback_section else "No detailed feedback available."
-            
+                 
             # Display results in tabs
             tab1, tab2 = st.tabs(["📋 Feedback Analysis", "📊 Score Analysis"])
 
