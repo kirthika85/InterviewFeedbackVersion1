@@ -114,7 +114,7 @@ else:
         Key Strengths:
         [Summarize the standout qualities of the candidate.]
 
-        Scores for each criterion in this structure:
+        Provide Scores for each criterion in this structure:
         - Alignment Score: [Score/100]
         - Clarity Score: [Score/100]
         - Strength Score: [Score/100]
