@@ -216,7 +216,7 @@ else:
                 st.subheader("Detailed Feedback Analysis")
                 st.markdown("Here is a detailed breakdown of the feedback:")
 
-                feedback_pattern = r"(?s)(.*?Key Strengths:.*?)(\n[A-Z].*?Scores:|\Z)"
+                feedback_pattern = r"(?s)(.*?Key Strengths:.*?)(\n[A-Z].*?Score:|\Z)"
                 feedback_match = re.search(feedback_pattern, result)
 
                 if feedback_match:
