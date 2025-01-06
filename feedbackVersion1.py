@@ -207,7 +207,7 @@ else:
             st.write("Agent processing complete.")
 
             # Display the agent result
-            st.write("Agent Result:", result)
+            #st.write("Agent Result:", result)
                  
             # Display results in tabs
             tab1, tab2 = st.tabs(["📋 Feedback Analysis", "📊 Score Analysis"])
