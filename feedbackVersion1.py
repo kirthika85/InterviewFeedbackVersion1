@@ -107,9 +107,9 @@ else:
         - Overall: [Feedback]
 
                 
-        Areas of Improvement: [Provide actionable advice for improving performance in each criterion that scored below 70.]
+        Areas of Improvement:[Provide actionable advice for improving performance in each criterion that scored below 70.]
         
-        Key Strengths: [Summarize the standout qualities of the candidate.]
+        Key Strengths:[Summarize the standout qualities of the candidate.]
 
         Provide Scores for the criteria in this structure:
         - Alignment Score: [Score/100]
