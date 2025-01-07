@@ -96,16 +96,14 @@ else:
         3. Strength of responses to key questions.
         4. Technical competence
         5. Cultural fit with {company_name}
-        6. Problem-solving skills
-        7. Overall assessment
+        6. Overall assessment
 
         For each criterion, provide detailed qualitative feedback without mentioning scores. Use this structure:
         - Alignment: [Feedback]
         - Clarity: [Feedback]
         - Strength: [Feedback]
         - Technical Competence: [Feedback]
-        - Cultural Fit: [Feedback]
-        - Problem-Solving: [Feedback]
+        - Cultural Fit: [Feedback]        
         - Overall: [Feedback]
 
                 
@@ -118,8 +116,7 @@ else:
         - Clarity Score: [Score/100]
         - Strength Score: [Score/100]
         - Technical Competence Score: [Score/100]
-        - Cultural Fit Score: [Score/100]
-        - Problem-Solving Score: [Score/100]
+        - Cultural Fit Score: [Score/100]        
         - Overall Score: [Score/100]
 
         Ensure that the 'Scores:' section always appears immediately after the 'Key Strengths:' section, maintaining this exact structure and order.        
