@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import openai
 import streamlit as st
 #from langchain.agents import create_tool_calling_agent
-from langchain.agents.tool_calling.base import create_tool_calling_agent
+from langchain.agents.tool_calling.agent import create_tool_calling_agent
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
