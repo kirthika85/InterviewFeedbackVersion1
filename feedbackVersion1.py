@@ -1,7 +1,7 @@
 import streamlit as st
 import openai
 import matplotlib.pyplot as plt
-from langchain.chat_models import ChatOpenAI
+#from langchain.chat_models import ChatOpenAI
 from langchain_openai import ChatOpenAI
 from langchain.agents import initialize_agent, Tool
 from langchain.chains.conversation.memory import ConversationBufferMemory
