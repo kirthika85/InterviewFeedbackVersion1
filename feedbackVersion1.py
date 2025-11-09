@@ -6,7 +6,7 @@ from langchain_openai import ChatOpenAI
 #from langchain.agents import initialize_agent, Tool
 from langchain_core.tools import Tool
 #from langchain_core.agents import initialize_agent
-from lanchain.agents import initialize_agent
+from langchain.agents import initialize_agent
 from langchain.chains.conversation.memory import ConversationBufferMemory
 import re
 import io
