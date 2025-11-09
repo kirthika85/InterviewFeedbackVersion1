@@ -1,8 +1,7 @@
 streamlit
 openai
-langchain>=0.1.0
-langchain-community
-langchain_openai
-langchain-openai
-langchain_core
+langchain==0.1.17
+langchain-community==0.1.17
+langchain-openai==0.1.8
+langchain-core==0.1.52
 matplotlib
