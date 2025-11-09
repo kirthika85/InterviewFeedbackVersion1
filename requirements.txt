@@ -3,5 +3,6 @@ openai
 langchain
 langchain-community
 langchain_openai
+langchain-openai
 langchain_core
 matplotlib
